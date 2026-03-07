@@ -6,7 +6,7 @@
         
         <h3 class="text-center mb-4 fw-bold">Create Account</h3>
 
-        <form method="POST" action="{{ route('register') }}">
+        <form method="POST" action="{{ route('register') }}" autocomplete="on">
             @csrf
 
             {{-- Name --}}
@@ -16,6 +16,7 @@
                        name="name"
                        class="form-control rounded-3 @error('name') is-invalid @enderror"
                        value="{{ old('name') }}"
+                       autocomplete="name"
                        required>
                 @error('name')
                     <div class="invalid-feedback">{{ $message }}</div>
@@ -29,6 +30,7 @@
                        name="email"
                        class="form-control rounded-3 @error('email') is-invalid @enderror"
                        value="{{ old('email') }}"
+                       autocomplete="email"
                        required>
                 @error('email')
                     <div class="invalid-feedback">{{ $message }}</div>
@@ -41,6 +43,7 @@
                 <input type="password"
                        name="password"
                        class="form-control rounded-3 @error('password') is-invalid @enderror"
+                       autocomplete="new-password"
                        required>
                 @error('password')
                     <div class="invalid-feedback">{{ $message }}</div>
@@ -53,6 +56,7 @@
                 <input type="password"
                        name="password_confirmation"
                        class="form-control rounded-3"
+                       autocomplete="new-password"
                        required>
             </div>
 
