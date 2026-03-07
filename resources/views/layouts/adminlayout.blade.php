@@ -496,7 +496,7 @@
             <div class="nav-group-label">Commerce</div>
             <a href="{{ route('admin.orders') }}" class="nav-link-item {{ request()->routeIs('admin.orders') ? 'active' : '' }}">
                 <i class="bi bi-bag-check-fill"></i> Orders
-                <span class="nav-badge">12</span>
+                <!-- <span class="nav-badge"></span> -->
             </a>
             <a href="{{ route('admin.products') }}" class="nav-link-item {{ request()->routeIs('admin.products') ? 'active' : '' }}">
                 <i class="bi bi-box-seam-fill"></i> Products
@@ -569,7 +569,6 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
-        // ── Mobile sidebar toggle ──────────────────────────────────────────────
         (function () {
             const toggle  = document.getElementById('sidebarToggle');
             const sidebar = document.getElementById('adminSidebar');
