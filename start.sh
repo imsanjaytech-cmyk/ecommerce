@@ -1,24 +1,33 @@
-#!/bin/bash
+set -e
 
-# Cache config
+cat > /var/www/.env << EOF
+APP_NAME=${APP_NAME:-Laravel}
+APP_ENV=${APP_ENV:-production}
+APP_KEY=${APP_KEY}
+APP_DEBUG=${APP_DEBUG:-false}
+APP_URL=${APP_URL:-http://localhost}
+
+LOG_CHANNEL=stderr
+
+DB_CONNECTION=${DB_CONNECTION:-pgsql}
+DB_HOST=${DB_HOST}
+DB_PORT=${DB_PORT:-5432}
+DB_DATABASE=${DB_DATABASE}
+DB_USERNAME=${DB_USERNAME}
+DB_PASSWORD=${DB_PASSWORD}
+
+CACHE_DRIVER=${CACHE_DRIVER:-file}
+SESSION_DRIVER=${SESSION_DRIVER:-file}
+QUEUE_CONNECTION=${QUEUE_CONNECTION:-sync}
+EOF
+
 php artisan config:cache
 php artisan route:cache
 php artisan view:cache
+php artisan storage:link
 
-# Run migrations
 php artisan migrate --force
 
-# Start PHP-FPM in background
 php-fpm -D
 
-# Start Nginx
 nginx -g "daemon off;"
-```
-
-## .dockerignore
-```
-node_modules
-vendor
-.env
-.git
-storage/logs/*
