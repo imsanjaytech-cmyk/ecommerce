@@ -12,10 +12,7 @@ use App\Http\Controllers\Controller;
 class AdminController extends Controller {
     public function adminDashboard()
     {
-        if (
-            Auth::user()->role !== 'admin' ||
-            !in_array(Auth::user()->email, ['gruba@gmail.com', 'imsanjay.tech@gmail.com'])
-        ) {
+       if (Auth::user()->role !== 'admin' && !in_array(Auth::user()->email, ['gruba@gmail.com', 'imsanjay.tech@gmail.com']) {
             abort(403, 'Unauthorized access.');
         }
 
@@ -52,5 +49,6 @@ class AdminController extends Controller {
         ));
     }
 }
+
 
 
