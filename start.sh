@@ -1,6 +1,6 @@
 set -e
 
-cat > /var/www/.env << EOF
+cat > /var/www/.env << ENVEOF
 APP_NAME=${APP_NAME:-Laravel}
 APP_ENV=${APP_ENV:-production}
 APP_KEY=${APP_KEY}
@@ -19,12 +19,18 @@ DB_PASSWORD=${DB_PASSWORD}
 CACHE_DRIVER=${CACHE_DRIVER:-file}
 SESSION_DRIVER=${SESSION_DRIVER:-file}
 QUEUE_CONNECTION=${QUEUE_CONNECTION:-sync}
-EOF
+
+FILESYSTEM_DISK=${FILESYSTEM_DISK:-public}
+
+CLOUDINARY_URL=${CLOUDINARY_URL:-}
+ENVEOF
+
+rm -rf /var/www/public/storage
+php artisan storage:link
 
 php artisan config:cache
 php artisan route:cache
 php artisan view:cache
-php artisan storage:link
 
 php artisan migrate --force
 
