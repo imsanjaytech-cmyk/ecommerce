@@ -1,0 +1,39 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Order extends Model
+{
+    use HasFactory;
+
+    protected $table = 'orders';
+
+    protected $fillable = [
+        'user_id',
+        'order_number',
+        'razorpay_order_id',
+        'razorpay_payment_id',
+        'razorpay_signature',
+        'total_amount',
+        'paid_amount',
+        'status',
+        'payment_method',
+        'payment_status',
+        'shipping_address',
+        'order_date'
+    ];
+
+    protected $casts = [
+        'order_date' => 'datetime',
+        'total_amount' => 'decimal:2',
+        'paid_amount' => 'decimal:2',
+    ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+}
