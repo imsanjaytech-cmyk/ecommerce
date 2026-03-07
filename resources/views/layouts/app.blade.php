@@ -280,16 +280,22 @@
 
     <!-- ============ TOAST CONTAINER ============ -->
     <div id="toast-wrap"></div>
+
     <!-- ============ GO TO TOP ============ -->
     <button class="go-top" id="goTop" title="Back to top">
         <i class="bi bi-arrow-up"></i>
     </button>
+
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
+    <!-- Cart & Wishlist (plain JS — works in dev and production) -->
+    <script src="{{ asset('js/cart.js') }}"></script>
+
+    <!-- Vite (hero canvas animations only) -->
     @vite('resources/js/app.js')
 
-    <!-- App JS -->
+    <!-- Page Scripts -->
     @stack('scripts')
 </body>
 
