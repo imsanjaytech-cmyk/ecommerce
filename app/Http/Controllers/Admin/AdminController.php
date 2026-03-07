@@ -14,11 +14,11 @@ class AdminController extends Controller {
     {
         if (
             Auth::user()->role !== 'admin' ||
-            !in_array(Auth::user()->email, ['gruba@gmail.co', 'imsanjay.tech@gmail.com'])
+            !in_array(Auth::user()->email, ['gruba@gmail.com', 'imsanjay.tech@gmail.com'])
         ) {
             abort(403, 'Unauthorized access.');
         }
-        
+
         $totalOrders    = Order::count();
         $totalProducts  = Product::count();
         $totalCustomers = User::where('role', 'customer')->count();
