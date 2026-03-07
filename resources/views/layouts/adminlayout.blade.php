@@ -35,6 +35,12 @@
 
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+        /* ── CRITICAL FIX: stop horizontal overflow ── */
+        html, body {
+            overflow-x: hidden;
+            max-width: 100%;
+        }
+
         body {
             font-family: 'Poppins', sans-serif;
             background: var(--bg-page);
@@ -63,7 +69,6 @@
             transition: transform 0.3s ease;
         }
 
-        /* Mobile: hide sidebar off-screen */
         @media (max-width: 991px) {
             .sidebar {
                 transform: translateX(-100%);
@@ -74,7 +79,6 @@
             }
         }
 
-        /* Overlay behind sidebar on mobile */
         .sidebar-overlay {
             display: none;
             position: fixed;
@@ -155,12 +159,19 @@
         /* ═══ MAIN ═══ */
         .main-wrap {
             margin-left: var(--sidebar-w);
-            flex: 1; display: flex; flex-direction: column;
-            min-width: 0;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;        /* ← CRITICAL: prevents flex child overflow */
+            overflow-x: hidden;  /* ← CRITICAL: clip any overflow */
+            max-width: calc(100% - var(--sidebar-w));
         }
 
         @media (max-width: 991px) {
-            .main-wrap { margin-left: 0; }
+            .main-wrap {
+                margin-left: 0;
+                max-width: 100%;
+            }
         }
 
         /* ═══ TOPBAR ═══ */
@@ -178,7 +189,6 @@
 
         .topbar-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
 
-        /* Hamburger button – visible only on mobile/tablet */
         .sidebar-toggle-btn {
             display: none;
             width: 36px; height: 36px;
@@ -216,7 +226,6 @@
         }
         .search-wrap input::placeholder { color: #c4c9d4; }
 
-        /* Hide search bar on small screens, show icon only */
         @media (max-width: 767px) {
             .search-wrap { display: none; }
             .topbar-title { font-size: 14px; }
@@ -236,16 +245,20 @@
             background: var(--primary); border-radius: 50%; border: 1.5px solid white;
         }
 
-        /* Hide some topbar buttons on very small screens */
         @media (max-width: 480px) {
             .tb-btn.hide-xs { display: none; }
         }
 
         /* ═══ PAGE BODY ═══ */
-        .page-body { padding: 20px; flex: 1; }
+        .page-body {
+            padding: 20px;
+            flex: 1;
+            overflow-x: hidden; /* ← CRITICAL */
+            width: 100%;
+        }
 
         @media (max-width: 767px) {
-            .page-body { padding: 14px; }
+            .page-body { padding: 12px; }
         }
 
         /* ═══ CARDS ═══ */
@@ -284,24 +297,28 @@
         .sec-title { font-size: 15px; font-weight: 700; color: var(--dark); }
         .sec-sub { font-size: 11.5px; color: var(--text-muted); margin-top: 2px; }
 
-        /* ═══ TABLE – scrollable on mobile ═══ */
-        .table-responsive-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        /* ═══ TABLE ═══ */
+        .table-scroll {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            width: 100%;
+        }
+        .table-scroll::-webkit-scrollbar { height: 4px; }
+        .table-scroll::-webkit-scrollbar-thumb { background: var(--pink-mid); border-radius: 4px; }
 
-        .tbl { width: 100%; border-collapse: collapse; min-width: 700px; }
+        .tbl { width: 100%; border-collapse: collapse; min-width: 600px; }
         .tbl thead tr { border-bottom: 1.5px solid var(--border-col); }
-        .tbl th { padding: 10px 14px; font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: var(--text-muted); text-align: left; white-space: nowrap; }
-        .tbl td { padding: 13px 14px; font-size: 13.5px; border-bottom: 1px solid #f4f5f8; vertical-align: middle; }
+        .tbl th { padding: 10px 12px; font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: var(--text-muted); text-align: left; white-space: nowrap; }
+        .tbl td { padding: 12px 12px; font-size: 13px; border-bottom: 1px solid #f4f5f8; vertical-align: middle; white-space: nowrap; }
         .tbl tbody tr:last-child td { border-bottom: none; }
-        .tbl tbody tr { transition: background 0.15s; cursor: default; }
+        .tbl tbody tr { transition: background 0.15s; }
         .tbl tbody tr:hover { background: var(--pink-soft); }
 
-        /* Hide less critical columns on smaller screens */
-        @media (max-width: 991px) {
-            .tbl { min-width: 600px; }
-            .col-sales, .col-sku { display: none; }
-        }
-        @media (max-width: 767px) {
-            .col-cat, .col-feat { display: none; }
+        @media (max-width: 640px) {
+            .col-hide-sm { display: none !important; }
+            .tbl { min-width: 320px; }
+            .tbl th { padding: 8px 8px; font-size: 10px; }
+            .tbl td { padding: 10px 8px; font-size: 12px; }
         }
 
         /* ═══ BADGES ═══ */
@@ -353,11 +370,7 @@
         /* ═══ ACTION BUTTONS ═══ */
         .act-row { display: flex; gap: 5px; opacity: 0; transition: opacity 0.2s; }
         tr:hover .act-row { opacity: 1; }
-
-        /* Always show on touch devices */
-        @media (hover: none) {
-            .act-row { opacity: 1; }
-        }
+        @media (hover: none) { .act-row { opacity: 1; } }
 
         .act-btn {
             width: 28px; height: 28px; border-radius: 7px;
@@ -401,7 +414,7 @@
             .modal-footer .btn-p, .modal-footer .btn-o { width: 100%; justify-content: center; }
         }
 
-        /* ═══ CHIPS / FILTER TABS ═══ */
+        /* ═══ CHIPS ═══ */
         .chip {
             padding: 6px 15px; border-radius: 8px; font-size: 12px; font-weight: 600;
             cursor: pointer; border: 1.5px solid var(--border-col); background: white;
@@ -409,7 +422,6 @@
         }
         .chip:hover, .chip.on { background: var(--pink-soft); border-color: var(--secondary); color: var(--primary); }
 
-        /* Scrollable chip row on mobile */
         .chip-row {
             display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px;
             -webkit-overflow-scrolling: touch; scrollbar-width: none;
@@ -427,7 +439,7 @@
         .uz-text  { font-size: 13px; font-weight: 600; color: var(--dark); }
         .uz-sub   { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
 
-        /* ═══ FEATURED STAR BTN ═══ */
+        /* ═══ FEATURED STAR ═══ */
         .feat-btn {
             width: 30px; height: 30px; border-radius: 8px;
             border: 1.5px solid var(--border-col); background: white;
@@ -463,19 +475,26 @@
         }
 
         /* ═══ MISC ═══ */
-        .ch-wrap { position: relative; }
+        .ch-wrap { position: relative; width: 100%; }
         .ch-wrap canvas { width: 100% !important; }
 
-        /* Responsive grid helpers */
         @media (max-width: 575px) {
             .row-cols-sm-1 > * { flex: 0 0 100%; max-width: 100%; }
         }
+
+        /* ═══ OTHER TABLE COLUMN HIDERS ═══ */
+        @media (max-width: 991px) {
+            .col-sales, .col-sku { display: none; }
+        }
+        @media (max-width: 767px) {
+            .col-cat, .col-feat { display: none; }
+        }
     </style>
+    @stack('styles')
 </head>
 
 <body>
 
-    {{-- Overlay for mobile sidebar --}}
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
     <aside class="sidebar" id="adminSidebar">
@@ -496,7 +515,6 @@
             <div class="nav-group-label">Commerce</div>
             <a href="{{ route('admin.orders') }}" class="nav-link-item {{ request()->routeIs('admin.orders') ? 'active' : '' }}">
                 <i class="bi bi-bag-check-fill"></i> Orders
-                <!-- <span class="nav-badge"></span> -->
             </a>
             <a href="{{ route('admin.products') }}" class="nav-link-item {{ request()->routeIs('admin.products') ? 'active' : '' }}">
                 <i class="bi bi-box-seam-fill"></i> Products
@@ -534,7 +552,6 @@
     <div class="main-wrap">
         <header class="topbar">
             <div class="topbar-left">
-                {{-- Hamburger: only shows on mobile/tablet --}}
                 <button class="sidebar-toggle-btn" id="sidebarToggle" aria-label="Toggle menu">
                     <i class="bi bi-list"></i>
                 </button>
@@ -562,7 +579,6 @@
         </div>
     </div>
 
-    {{-- Toast container --}}
     <div id="toastContainer"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
@@ -590,14 +606,12 @@
             });
             overlay.addEventListener('click', closeSidebar);
 
-            // Close on nav link click (mobile UX)
             sidebar.querySelectorAll('.nav-link-item').forEach(link => {
                 link.addEventListener('click', () => {
                     if (window.innerWidth < 992) closeSidebar();
                 });
             });
 
-            // Close on resize to desktop
             window.addEventListener('resize', () => {
                 if (window.innerWidth >= 992) closeSidebar();
             });
