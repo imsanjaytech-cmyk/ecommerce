@@ -6,7 +6,7 @@
         
         <h3 class="text-center mb-4 fw-bold">Login</h3>
 
-        <form method="POST" action="{{ route('login') }}">
+        <form method="POST" action="{{ route('login') }}" autocomplete="on">
             @csrf
 
             {{-- Email --}}
@@ -16,6 +16,7 @@
                        name="email" 
                        class="form-control rounded-3 @error('email') is-invalid @enderror"
                        value="{{ old('email') }}" 
+                       autocomplete="email"
                        required autofocus>
                 @error('email')
                     <div class="invalid-feedback">{{ $message }}</div>
@@ -28,6 +29,7 @@
                 <input type="password" 
                        name="password" 
                        class="form-control rounded-3 @error('password') is-invalid @enderror"
+                       autocomplete="current-password"
                        required>
                 @error('password')
                     <div class="invalid-feedback">{{ $message }}</div>
@@ -63,7 +65,7 @@
             {{-- Register Link --}}
             <div class="text-center mt-3">
                 <a href="{{ route('register') }}" class="text-decoration-none">
-                    Don’t have an account? Register
+                    Don't have an account? Register
                 </a>
             </div>
 
