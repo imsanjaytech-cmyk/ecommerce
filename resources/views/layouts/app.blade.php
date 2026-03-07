@@ -24,7 +24,6 @@
 </head>
 
 <body>
-    @vite('resources/js/app.js')
     <div class="offer-strip">
         <div class="offer-strip-items">
             <span class="offer-strip-item"><i class="bi bi-truck"></i> Free Delivery Above ₹1,500</span>
@@ -287,6 +286,8 @@
     </button>
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    @vite('resources/js/app.js')
 
     <!-- App JS -->
     @stack('scripts')
