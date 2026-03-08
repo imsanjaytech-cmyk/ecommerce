@@ -55,7 +55,7 @@
             </div>
 
             {{-- Google Login --}}
-            <a href="#" 
+            <a href="{{ route('google.login') }}" 
                class="btn btn-light border w-100 rounded-pill py-2 d-flex align-items-center justify-content-center">
                 <img src="https://developers.google.com/identity/images/g-logo.png" 
                      width="18" class="me-2">
