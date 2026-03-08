@@ -117,9 +117,13 @@ class ProductsController extends Controller
             DB::beginTransaction();
 
             if ($request->hasFile('thumbnail')) {
-                // Cloudinary returns a full https:// URL as the stored path
+
+                if (!Storage::disk('public')->exists('products/thumbnails')) {
+                    Storage::disk('public')->makeDirectory('products/thumbnails');
+                }
+            
                 $data['thumbnail'] = $request->file('thumbnail')
-                    ->store('products/thumbnails', 'cloudinary');
+                    ->store('products/thumbnails', 'public');
             }
 
             $data['slug'] = Str::slug($data['name']);
@@ -127,10 +131,18 @@ class ProductsController extends Controller
             $product = Product::create($data);
 
             if ($request->hasFile('images')) {
+
+                if (!Storage::disk('public')->exists('products/images')) {
+                    Storage::disk('public')->makeDirectory('products/images');
+                }
+
                 foreach ($request->file('images') as $i => $file) {
+            
+                    $path = $file->store('products/images', 'public');
+            
                     ProductImage::create([
                         'product_id' => $product->id,
-                        'path'       => $file->store('products/images', 'cloudinary'),
+                        'path'       => $path,
                         'sort_order' => $i,
                     ]);
                 }
@@ -173,8 +185,9 @@ class ProductsController extends Controller
                 'tags'                => $product->tags,
                 'product_images'      => $product->productImages->map(fn($img) => [
                     'id'  => $img->id,
-                    // Cloudinary paths are already full https:// URLs
-                    'url' => $img->path,
+                    'url' => str_starts_with($img->path, 'http')
+                                ? $img->path
+                                : asset('storage/'.$img->path),
                 ]),
             ]),
         ]);
@@ -213,14 +226,11 @@ class ProductsController extends Controller
             DB::beginTransaction();
 
             if ($request->hasFile('thumbnail')) {
-                // Delete old thumbnail from Cloudinary
-                if ($product->thumbnail) {
-                    $publicId = $this->extractCloudinaryPublicId($product->thumbnail);
-                    if ($publicId) Storage::disk('cloudinary')->delete($publicId);
+                if ($product->thumbnail && !str_starts_with($product->thumbnail, 'http')) {
+                    Storage::disk('public')->delete($product->thumbnail);
                 }
-
                 $data['thumbnail'] = $request->file('thumbnail')
-                    ->store('products/thumbnails', 'cloudinary');
+                    ->store('products/thumbnails', 'public');
             }
 
             $data['slug'] = Str::slug($data['name']);
@@ -231,7 +241,7 @@ class ProductsController extends Controller
                 foreach ($request->file('images') as $i => $file) {
                     ProductImage::create([
                         'product_id' => $product->id,
-                        'path'       => $file->store('products/images', 'cloudinary'),
+                        'path'       => $file->store('products/images', 'public'),
                         'sort_order' => $product->productImages()->count() + $i,
                     ]);
                 }
@@ -253,42 +263,14 @@ class ProductsController extends Controller
 
     public function destroy(Product $product): JsonResponse
     {
-        // Delete thumbnail from Cloudinary
-        if ($product->thumbnail) {
-            $publicId = $this->extractCloudinaryPublicId($product->thumbnail);
-            if ($publicId) Storage::disk('cloudinary')->delete($publicId);
-        }
-
-        // Delete all product images from Cloudinary
-        foreach ($product->productImages as $img) {
-            $publicId = $this->extractCloudinaryPublicId($img->path);
-            if ($publicId) Storage::disk('cloudinary')->delete($publicId);
-        }
-
         $product->delete();
-
         return response()->json(['success' => true, 'message' => 'Product deleted successfully.']);
     }
 
     public function bulkDelete(Request $request): JsonResponse
     {
         $request->validate(['ids' => 'required|array', 'ids.*' => 'integer|exists:products,id']);
-
-        $products = Product::with('productImages')->whereIn('id', $request->ids)->get();
-
-        foreach ($products as $product) {
-            if ($product->thumbnail) {
-                $publicId = $this->extractCloudinaryPublicId($product->thumbnail);
-                if ($publicId) Storage::disk('cloudinary')->delete($publicId);
-            }
-            foreach ($product->productImages as $img) {
-                $publicId = $this->extractCloudinaryPublicId($img->path);
-                if ($publicId) Storage::disk('cloudinary')->delete($publicId);
-            }
-        }
-
         Product::whereIn('id', $request->ids)->delete();
-
         return response()->json(['success' => true, 'message' => count($request->ids).' products deleted.']);
     }
 
@@ -304,11 +286,10 @@ class ProductsController extends Controller
 
     public function deleteImage(ProductImage $image): JsonResponse
     {
-        $publicId = $this->extractCloudinaryPublicId($image->path);
-        if ($publicId) Storage::disk('cloudinary')->delete($publicId);
-
+        if (! str_starts_with($image->path, 'http')) {
+            Storage::disk('public')->delete($image->path);
+        }
         $image->delete();
-
         return response()->json(['success' => true, 'message' => 'Image deleted.']);
     }
 
@@ -323,16 +304,6 @@ class ProductsController extends Controller
                 'out_of_stock' => Product::where('stock_status', 'out_of_stock')->count(),
             ],
         ]);
-    }
-    private function extractCloudinaryPublicId(string $url): ?string
-    {
-        if (!str_contains($url, 'cloudinary.com')) return null;
-
-        if (preg_match('/\/upload\/(?:v\d+\/)?(.+)\.[a-zA-Z]+$/', $url, $matches)) {
-            return $matches[1];
-        }
-
-        return null;
     }
 
     private function productPayload(Product $p): array
