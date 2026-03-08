@@ -146,7 +146,6 @@
     function renderGrid(cats) {
         if (gridLoader) gridLoader.style.display = 'none';
 
-        // Remove existing cards but keep loader el
         [...grid.children].forEach(el => {
             if (el.id !== 'gridLoader') el.remove();
         });
@@ -174,7 +173,6 @@
             const bgSoft = hexWithAlpha(color, 0.10);
             const bgBorder = hexWithAlpha(color, 0.15);
 
-            // Find parent name if exists
             const parent = c.parent_id
                 ? state.categories.find(p => p.id === c.parent_id)
                 : null;
@@ -229,7 +227,6 @@
             grid.appendChild(col);
         });
 
-        // Bind card events
         grid.querySelectorAll('.cat-edit-btn').forEach(btn => {
             btn.addEventListener('click', () => openEditModal(parseInt(btn.dataset.id)));
         });
@@ -297,8 +294,6 @@
         deleteModal.show();
     }
 
-    // ─── Fill form ─────────────────────────────────────────────────────────────
-
     function fillCatForm(c) {
         fName.value          = c.name        || '';
         fSlug.value          = c.slug        || '';
@@ -324,22 +319,18 @@
         updateColorSwatches(c.color);
     }
 
-    // ─── Save ──────────────────────────────────────────────────────────────────
-
     function saveCategory() {
         clearCatErrors();
 
         const payload = {
             name:        fName.value.trim(),
             slug:        fSlug.value.trim() || null,
-            parent_id:   fParent.value || null,
             description: fDesc.value.trim() || null,
             icon:        fIcon.value.trim() || null,
             color:       fColor.value.trim() || null,
             is_active:   fActive.checked ? 1 : 0,
         };
 
-        // Client-side required check
         if (!payload.name) {
             showCatError('cat_name', 'Category name is required.');
             return;
@@ -390,8 +381,6 @@
         });
     }
 
-    // ─── Delete ────────────────────────────────────────────────────────────────
-
     function confirmDelete() {
         if (!state.deleteTargetId) return;
         confirmDeleteBtn.disabled = true;
@@ -418,7 +407,6 @@
         });
     }
 
-    // ─── Toggle active ─────────────────────────────────────────────────────────
 
     function toggleActive(id) {
         fetch(window.CAT.routes.toggle(id), {
@@ -429,7 +417,6 @@
         .then(res => {
             if (!res.success) throw new Error(res.message);
             toast(res.message, 'info');
-            // Update local state so we don't need a full reload
             const cat = state.categories.find(c => c.id === id);
             if (cat) cat.is_active = res.is_active;
             applyFilter();
@@ -438,10 +425,8 @@
         .catch(err => toast(err.message || 'Toggle failed.', 'error'));
     }
 
-    // ─── Form helpers ──────────────────────────────────────────────────────────
 
     function showCatError(field, message) {
-        // field might be 'name' or 'cat_name' — normalise
         const key    = field.replace(/^cat_/, '');
         const errEl  = $(`err_cat_${key}`);
         const inpEl  = $(`f_cat_${key}`);
@@ -507,10 +492,8 @@
             applyFilter();
         });
 
-        // Icon preview live update
         fIcon.addEventListener('input', () => updateIconPreview(fIcon.value));
 
-        // Color text → picker sync
         fColor.addEventListener('input', () => {
             const val = fColor.value.trim();
             if (/^#[0-9a-fA-F]{6}$/.test(val)) {
@@ -519,13 +502,11 @@
             updateColorSwatches(val);
         });
 
-        // Color picker → text sync
         fColorPicker.addEventListener('input', () => {
             fColor.value = fColorPicker.value;
             updateColorSwatches(fColorPicker.value);
         });
 
-        // Color swatches
         document.querySelectorAll('.color-swatch').forEach(sw => {
             sw.addEventListener('click', () => {
                 const color = sw.dataset.color;
