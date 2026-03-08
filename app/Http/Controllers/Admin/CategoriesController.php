@@ -10,22 +10,21 @@ use Illuminate\Support\Str;
 
 class CategoriesController extends Controller
 {
-
     public function index()
     {
         $categories = Category::withCount('products')
-        ->where('is_active', true)
-        ->orderBy('name')
-        ->get();
+            ->orderBy('name')
+            ->get();
 
         return view('admin.categories', compact('categories'));
     }
 
     public function list(): JsonResponse
     {
-        $categories = Category::where('is_active', true)
+        $categories = Category::withCount('products')
             ->orderBy('name')
-            ->get(['id', 'name', 'slug']);
+            ->get()
+            ->map(fn($c) => $this->categoryPayload($c));
 
         return response()->json([
             'success' => true,
@@ -59,7 +58,6 @@ class CategoriesController extends Controller
             'category' => $this->categoryPayload($category),
         ], 201);
     }
-
 
     public function show(Category $category): JsonResponse
     {
@@ -107,13 +105,13 @@ class CategoriesController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Category deleted successfully.',
+            'message' => 'Category "' . $category->name . '" deleted successfully.',
         ]);
     }
-    
+
     public function toggleActive(Category $category): JsonResponse
     {
-        $category->update(['is_active' => ! $category->is_active]);
+        $category->update(['is_active' => !$category->is_active]);
 
         return response()->json([
             'success'   => true,
@@ -122,18 +120,19 @@ class CategoriesController extends Controller
         ]);
     }
 
+
     private function categoryPayload(Category $c): array
     {
         return [
-            'id'            => $c->id,
-            'name'          => $c->name,
-            'slug'          => $c->slug,
-            'parent_id'     => $c->parent_id,
-            'description'   => $c->description,
-            'icon'          => $c->icon,
-            'color'         => $c->color,
-            'is_active'     => $c->is_active,
-            'products_count'=> $c->products()->count(),
+            'id'             => $c->id,
+            'name'           => $c->name,
+            'slug'           => $c->slug,
+            'parent_id'      => $c->parent_id,
+            'description'    => $c->description,
+            'icon'           => $c->icon,
+            'color'          => $c->color,
+            'is_active'      => (bool) $c->is_active,
+            'products_count' => $c->products_count ?? $c->products()->count(),
         ];
     }
 }
