@@ -2,10 +2,10 @@
     'use strict';
 
     const state = {
-        categories:       [],
-        filtered:         [],
+        categories:       [],  
+        filtered:         [],  
         search:           '',
-        statusFilter:     '',
+        statusFilter:     '',   
         editingId:        null,
         deleteTargetId:   null,
         deleteTargetName: '',
@@ -168,10 +168,14 @@
             col.className = 'col-md-4 col-sm-6';
             col.style.animationDelay = `${idx * 40}ms`;
 
-            const color    = c.color || '#9199a6';
-            const icon     = c.icon  || 'bi-tag';
-            const bgSoft   = hexWithAlpha(color, 0.10);
+            const color  = c.color  || '#9199a6';
+            const icon   = c.icon   || 'bi-tag';
+            const bgSoft = hexWithAlpha(color, 0.10);
             const bgBorder = hexWithAlpha(color, 0.15);
+
+            const parent = c.parent_id
+                ? state.categories.find(p => p.id === c.parent_id)
+                : null;
 
             col.innerHTML = `
                 <div class="cat-card" style="--cat-color:${color};" data-id="${c.id}">
@@ -184,6 +188,7 @@
                             <div style="min-width:0;">
                                 <div class="cat-name">${esc(c.name)}</div>
                                 <div class="cat-slug">/${esc(c.slug)}</div>
+                                ${parent ? `<div style="font-size:10.5px;margin-top:2px;"><span style="color:var(--text-muted);">Under:</span> <span style="color:var(--primary);font-weight:600;">${esc(parent.name)}</span></div>` : ''}
                             </div>
                         </div>
                         <div style="display:flex;gap:5px;flex-shrink:0;margin-left:8px;">
@@ -290,13 +295,25 @@
     }
 
     function fillCatForm(c) {
-        fName.value        = c.name        || '';
-        fSlug.value        = c.slug        || '';
-        fDesc.value        = c.description || '';
-        fIcon.value        = c.icon        || '';
-        fColor.value       = c.color       || '';
-        fActive.checked    = !!c.is_active;
-        fColorPicker.value = c.color       || '#ff4d6d';
+        fName.value          = c.name        || '';
+        fSlug.value          = c.slug        || '';
+        fDesc.value          = c.description || '';
+        fIcon.value          = c.icon        || '';
+        fColor.value         = c.color       || '';
+        fActive.checked      = !!c.is_active;
+        fColorPicker.value   = c.color       || '#ff4d6d';
+
+        // Set parent — exclude self from options
+        fParent.innerHTML = '<option value="">None (Top Level)</option>';
+        state.categories
+            .filter(cat => !cat.parent_id && cat.id !== c.id)
+            .forEach(cat => {
+                const opt = document.createElement('option');
+                opt.value = cat.id;
+                opt.textContent = cat.name;
+                if (cat.id === c.parent_id) opt.selected = true;
+                fParent.appendChild(opt);
+            });
 
         updateIconPreview(c.icon);
         updateColorSwatches(c.color);
@@ -323,8 +340,8 @@
         const url    = isEdit ? window.CAT.routes.update(state.editingId) : window.CAT.routes.store;
         const method = isEdit ? 'PUT' : 'POST';
 
-        saveCatBtn.disabled          = true;
-        saveCatText.style.display    = 'none';
+        saveCatBtn.disabled       = true;
+        saveCatText.style.display = 'none';
         saveCatSpinner.style.display = 'inline-block';
 
         fetch(url, {
@@ -366,7 +383,7 @@
 
     function confirmDelete() {
         if (!state.deleteTargetId) return;
-        confirmDeleteBtn.disabled      = true;
+        confirmDeleteBtn.disabled = true;
         deleteCatSpinner.style.display = 'inline-block';
 
         fetch(window.CAT.routes.destroy(state.deleteTargetId), {
@@ -390,6 +407,7 @@
         });
     }
 
+
     function toggleActive(id) {
         fetch(window.CAT.routes.toggle(id), {
             method: 'PATCH',
@@ -409,9 +427,9 @@
 
 
     function showCatError(field, message) {
-        const key   = field.replace(/^cat_/, '');
-        const errEl = $(`err_cat_${key}`);
-        const inpEl = $(`f_cat_${key}`);
+        const key    = field.replace(/^cat_/, '');
+        const errEl  = $(`err_cat_${key}`);
+        const inpEl  = $(`f_cat_${key}`);
         if (errEl) errEl.textContent = message;
         if (inpEl) inpEl.classList.add('is-invalid');
     }
@@ -425,8 +443,8 @@
     function resetCatForm() {
         catForm.reset();
         clearCatErrors();
-        catId.value        = '';
-        fActive.checked    = true;
+        catId.value = '';
+        fActive.checked = true;
         fColorPicker.value = '#ff4d6d';
         updateIconPreview('bi-tag');
         updateColorSwatches('');
@@ -491,7 +509,7 @@
 
         document.querySelectorAll('.color-swatch').forEach(sw => {
             sw.addEventListener('click', () => {
-                const color    = sw.dataset.color;
+                const color = sw.dataset.color;
                 fColor.value       = color;
                 fColorPicker.value = color;
                 updateColorSwatches(color);
@@ -499,7 +517,7 @@
         });
 
         fName.addEventListener('input', () => {
-            if (!catId.value) {
+            if (!catId.value) {   
                 fSlug.value = fName.value.trim()
                     .toLowerCase()
                     .replace(/[^a-z0-9\s-]/g, '')
