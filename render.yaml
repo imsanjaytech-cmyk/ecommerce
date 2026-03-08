@@ -22,4 +22,18 @@ services:
         value: ecommerce_p2q6_user
       - key: DB_PASSWORD
         value:  raP6V0l5a3XjrS6mi7IVjhxrE6ArbgHf
+      - key: CLOUDINARY_KEY
+        value: your-api-key
+      - key: CLOUDINARY_SECRET
+        value: your-api-secret
+      - key: CLOUDINARY_CLOUD_NAME
+        value: your-cloud-name
+      - key: FILESYSTEM_DISK
+        value: cloudinary
+      - key: GOOGLE_CLIENT_ID
+        value: your-google-client-id
+      - key: GOOGLE_CLIENT_SECRET
+        value: your-google-client-secret
+      - key: GOOGLE_REDIRECT_URI
+        value: https://ecommerce-wdoj.onrender.com/auth/google/callback
         sync: false         
