@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 
 class AccountController extends Controller
 {
@@ -57,5 +58,33 @@ class AccountController extends Controller
         $order->load('items.product');
 
         return view('account.order-detail-customer', compact('order'));
+    }
+
+    public function cancel(Request $request, Order $order): JsonResponse
+    {
+        if ($order->user_id !== auth()->id()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You are not authorised to cancel this order.',
+            ], 403);
+        }
+
+        if (! in_array($order->status, ['pending', 'processing'])) {
+            $message = match ($order->status) {
+                'shipped'   => 'Your order has already been shipped and cannot be cancelled.',
+                'delivered' => 'Your order has already been delivered.',
+                'cancelled' => 'This order is already cancelled.',
+                default     => 'This order cannot be cancelled at this stage.',
+            };
+
+            return response()->json(['success' => false, 'message' => $message], 422);
+        }
+
+        $order->update(['status' => 'cancelled']);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Order #' . $order->order_number . ' has been cancelled.',
+        ]);
     }
 }
