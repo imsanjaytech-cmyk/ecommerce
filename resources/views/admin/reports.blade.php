@@ -26,21 +26,22 @@
 
 <div class="row g-3 mb-4">
     @php
-    $kpis=[
+    $kpis = [
         ['label'=>'Gross Revenue','val'=>'$94.2K','change'=>'+18.3% YoY','up'=>true,'icon'=>'bi-currency-dollar','si'=>'si-pink'],
         ['label'=>'Net Profit',   'val'=>'$31.8K','change'=>'+9.1% margin','up'=>true,'icon'=>'bi-graph-up',     'si'=>'si-green'],
-        ['label'=>'Avg Order Val','val'=>'$73.40','change'=>'+5.2%','up'=>true,'icon'=>'bi-cart-check-fill',     'si'=>'si-blue'],
-        ['label'=>'Conv. Rate',   'val'=>'3.84%', 'change'=>'-0.2%','up'=>false,'icon'=>'bi-percent',           'si'=>'si-orange'],
+        ['label'=>'Avg Order Val','val'=>'$73.40','change'=>'+5.2%','up'=>true,'icon'=>'bi-cart-check-fill','si'=>'si-blue'],
+        ['label'=>'Conv. Rate',   'val'=>'3.84%', 'change'=>'-0.2%','up'=>false,'icon'=>'bi-percent',       'si'=>'si-orange'],
     ];
     @endphp
+
     @foreach($kpis as $k)
-    <div class="col-md-3 col-sm-6">
+    <div class="col-6 col-lg-3">
         <div class="stat-card">
             <div class="stat-icon {{ $k['si'] }}"><i class="bi {{ $k['icon'] }}"></i></div>
             <div class="stat-label">{{ $k['label'] }}</div>
             <div class="stat-value">{{ $k['val'] }}</div>
-            <div class="stat-change {{ $k['up']?'ch-up':'ch-down' }}">
-                <i class="bi {{ $k['up']?'bi-arrow-up-right':'bi-arrow-down-right' }}"></i> {{ $k['change'] }}
+            <div class="stat-change {{ $k['up'] ? 'ch-up' : 'ch-down' }}">
+                <i class="bi {{ $k['up'] ? 'bi-arrow-up-right' : 'bi-arrow-down-right' }}"></i> {{ $k['change'] }}
             </div>
         </div>
     </div>
