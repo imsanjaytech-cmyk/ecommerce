@@ -25,16 +25,16 @@ class Order extends Model
         'payment_method',
         'payment_status',
         'shipping_address',
-        'order_date'
+        'order_date',
     ];
 
     protected $casts = [
-        'order_date' => 'datetime',
+        'order_date'   => 'datetime',
         'total_amount' => 'decimal:2',
-        'paid_amount' => 'decimal:2',
+        'paid_amount'  => 'decimal:2',
     ];
 
-    public function user()
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
