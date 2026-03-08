@@ -333,7 +333,9 @@
                     @forelse($recentOrders as $order)
                     <tr>
                         <td style="color:var(--primary);font-weight:700">
-                            <a href="" style="color:inherit;text-decoration:none">#{{ $order->order_number }}</a>
+                            <a href="{{ url('/admin/orders/'.$order->id) }}" style="color:inherit;text-decoration:none">
+                                #{{ $order->order_number }}
+                            </a>
                         </td>
                         <td style="font-weight:500">{{ $order->user?->name ?? 'Guest' }}</td>
                         <td>{{ $order->items_count ?? optional($order->items)->count() ?? 0 }} items</td>
