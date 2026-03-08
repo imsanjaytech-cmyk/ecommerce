@@ -6,7 +6,7 @@
 
 {{-- ── Stat Cards ── --}}
 <div class="row g-3 mb-4">
-    <div class="col-md-3 col-sm-6">
+    <div class="col-6 col-lg-3">
         <div class="stat-card">
             <div class="stat-deco" style="background:#1a7cd4;"></div>
             <div class="stat-icon si-blue"><i class="bi bi-people-fill"></i></div>
@@ -15,7 +15,8 @@
             <div class="stat-change ch-up"><i class="bi bi-arrow-up-right"></i> Registered users</div>
         </div>
     </div>
-    <div class="col-md-3 col-sm-6">
+
+    <div class="col-6 col-lg-3">
         <div class="stat-card">
             <div class="stat-deco" style="background:var(--primary);"></div>
             <div class="stat-icon si-pink"><i class="bi bi-shop"></i></div>
@@ -24,7 +25,8 @@
             <div class="stat-change ch-up"><i class="bi bi-arrow-up-right"></i> Active vendors</div>
         </div>
     </div>
-    <div class="col-md-3 col-sm-6">
+
+    <div class="col-6 col-lg-3">
         <div class="stat-card">
             <div class="stat-deco" style="background:#d97706;"></div>
             <div class="stat-icon si-orange"><i class="bi bi-shield-lock-fill"></i></div>
@@ -33,7 +35,8 @@
             <div class="stat-change ch-up"><i class="bi bi-arrow-up-right"></i> System admins</div>
         </div>
     </div>
-    <div class="col-md-3 col-sm-6">
+
+    <div class="col-6 col-lg-3">
         <div class="stat-card">
             <div class="stat-deco" style="background:#1f9c4a;"></div>
             <div class="stat-icon si-green"><i class="bi bi-person-fill-add"></i></div>
@@ -43,7 +46,6 @@
         </div>
     </div>
 </div>
-
 <div class="card-w">
 
     {{-- ── Header ── --}}
