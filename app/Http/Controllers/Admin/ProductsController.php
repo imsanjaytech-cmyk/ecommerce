@@ -18,17 +18,20 @@ class ProductsController extends Controller
     public function index()
     {
         $categories = Category::where('is_active', true)->orderBy('name')->get();
-
+    
         $stats = [
             'total'        => Product::count(),
             'in_stock'     => Product::where('stock_status', 'in_stock')->count(),
             'low_stock'    => Product::where('stock_status', 'low_stock')->count(),
             'out_of_stock' => Product::where('stock_status', 'out_of_stock')->count(),
         ];
-
-        return view('admin.products', compact('categories', 'stats'));
+    
+        $currency = DB::table('settings')
+            ->where('key', 'currency_symbol')
+            ->value('value');
+    
+        return view('admin.products', compact('categories', 'stats', 'currency'));
     }
-
     public function list(Request $request): JsonResponse
     {
         $query = Product::with('category')
