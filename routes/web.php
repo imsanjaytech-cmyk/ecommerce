@@ -10,7 +10,7 @@ use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\EnquiryController;
 use App\Http\Controllers\SearchController;
-use App\Http\Controllers\NewsletterController;
+use App\Http\Controllers\NewsLetterController;
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Admin\AdminController;
@@ -19,8 +19,9 @@ use App\Http\Controllers\Admin\OrdersController;
 use App\Http\Controllers\Admin\CustomersController;
 use App\Http\Controllers\Admin\ReportsController;
 use App\Http\Controllers\Admin\SettingsController;
-
-// ── Public ────────────────────────────────────────────────────────────────────
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
+// ── Public ─────────────────────────────────────────────────────────────────────
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
@@ -33,7 +34,7 @@ Route::post('/newsletter/subscribe', [NewsletterController::class, 'subscribe'])
 Route::get('/track-order',  [OrderController::class, 'track'])->name('track.order');
 Route::post('/track-order', [OrderController::class, 'trackResult'])->name('track.order.result');
 
-// ── Auth ──────────────────────────────────────────────────────────────────────
+// ── Auth ────────────────────────────────────────────────────────────────────────
 
 Route::get('/login',    [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login',   [AuthController::class, 'login']);
@@ -44,7 +45,15 @@ Route::post('/logout',  [AuthController::class, 'logout'])->name('logout');
 Route::get('/auth/google',          [AuthController::class, 'redirectToGoogle'])->name('google.login');
 Route::get('/auth/google/callback', [AuthController::class, 'handleGoogleCallback']);
 
-// ── Products ──────────────────────────────────────────────────────────────────
+Route::get('/debug-db', function () {
+    return [
+        'orders_table'      => Schema::hasTable('orders'),
+        'order_items_table' => Schema::hasTable('order_items'),
+        'migrations'        => DB::table('migrations')->pluck('migration'),
+        'tables'            => DB::select("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'"),
+    ];
+});
+// ── Products ────────────────────────────────────────────────────────────────────
 
 Route::prefix('products')->name('products.')->group(function () {
     Route::get('/',       [ProductController::class, 'index'])->name('index');
@@ -52,7 +61,7 @@ Route::prefix('products')->name('products.')->group(function () {
     Route::get('/{slug}', [ProductController::class, 'show'])->name('show');
 });
 
-// ── Cart ──────────────────────────────────────────────────────────────────────
+// ── Cart ────────────────────────────────────────────────────────────────────────
 
 Route::prefix('cart')->name('cart.')->group(function () {
     Route::get('/',        [CartController::class, 'index'])->name('index');
@@ -62,19 +71,19 @@ Route::prefix('cart')->name('cart.')->group(function () {
     Route::get('/clear',   [CartController::class, 'clear'])->name('clear');
 });
 
-// ── Checkout & Orders (public) ────────────────────────────────────────────────
+// ── Checkout & Orders ───────────────────────────────────────────────────────────
 
-Route::get('/checkout',    [CheckoutController::class, 'index'])->name('checkout');
-Route::post('/place-order',[CheckoutController::class, 'placeOrder'])->name('place.order');
+Route::get('/checkout',     [CheckoutController::class, 'index'])->name('checkout');
+Route::post('/place-order', [CheckoutController::class, 'placeOrder'])->name('place.order');
 
-Route::post('/orders',                       [OrderController::class, 'store'])->name('orders.store');
-Route::get('/orders/{order}/confirmation',   [OrderController::class, 'confirmation'])->name('orders.confirmation');
-Route::post('/payment-success',              [OrderController::class, 'paymentSuccess'])->name('payment.success');
+Route::post('/orders',                     [OrderController::class, 'store'])->name('orders.store');
+Route::get('/orders/{order}/confirmation', [OrderController::class, 'confirmation'])->name('orders.confirmation');
+Route::post('/payment-success',            [OrderController::class, 'paymentSuccess'])->name('payment.success');
 
 Route::view('/success', 'pages.success')->name('success');
 Route::view('/failed',  'pages.failed')->name('failed');
 
-// ── Auth-protected ────────────────────────────────────────────────────────────
+// ── Auth-protected ──────────────────────────────────────────────────────────────
 
 Route::middleware(['auth'])->group(function () {
 
@@ -84,16 +93,15 @@ Route::middleware(['auth'])->group(function () {
 
     // Account
     Route::prefix('account')->name('account.')->group(function () {
-        Route::get('/profile',        [AccountController::class, 'profile'])->name('profile');
-        Route::post('/profile',       [AccountController::class, 'updateProfile'])->name('profile.update');
-        Route::get('/orders',         [AccountController::class, 'orders'])->name('orders');
-        Route::get('/orders/{order}', [AccountController::class, 'show'])->name('orders.show');
-        // route('account.orders')      → /account/orders
-        // route('account.orders.show') → /account/orders/{order}  ✓
+        Route::get('/profile',               [AccountController::class, 'profile'])->name('profile');
+        Route::post('/profile',              [AccountController::class, 'updateProfile'])->name('profile.update');
+        Route::get('/orders',                [AccountController::class, 'orders'])->name('orders');
+        Route::get('/orders/{order}',        [AccountController::class, 'orderDetail'])->name('order.detail');
+        Route::post('/orders/{order}/cancel',[AccountController::class, 'cancel'])->name('order.cancel');
     });
 });
 
-// ── Admin ─────────────────────────────────────────────────────────────────────
+// ── Admin ───────────────────────────────────────────────────────────────────────
 
 Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
     Route::get('/dashboard', [AdminController::class, 'adminDashboard'])->name('dashboard');
@@ -111,19 +119,19 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     Route::delete('/product-images/{image}',     [ProductsController::class, 'deleteImage'])->name('products.image.delete');
 
     // Orders
-    Route::get('/orders',                      [OrdersController::class, 'index'])->name('orders');
-    Route::get('/orders/{order}',              [OrdersController::class, 'show'])->name('orders.show');
-    Route::patch('/orders/{order}/status',     [OrdersController::class, 'updateStatus'])->name('orders.status');
-    Route::delete('/orders/{order}',           [OrdersController::class, 'destroy'])->name('orders.destroy');
+    Route::get('/orders',                  [OrdersController::class, 'index'])->name('orders');
+    Route::get('/orders/{order}',          [OrdersController::class, 'show'])->name('orders.show');
+    Route::patch('/orders/{order}/status', [OrdersController::class, 'updateStatus'])->name('orders.status');
+    Route::delete('/orders/{order}',       [OrdersController::class, 'destroy'])->name('orders.destroy');
 
     // Categories
-    Route::get('/categories',                        [CategoriesController::class, 'index'])->name('categories');
-    Route::get('/categories/list',                   [CategoriesController::class, 'list'])->name('categories.list');
-    Route::post('/categories',                       [CategoriesController::class, 'store'])->name('categories.store');
-    Route::get('/categories/{category}',             [CategoriesController::class, 'show'])->name('categories.show');
-    Route::put('/categories/{category}',             [CategoriesController::class, 'update'])->name('categories.update');
-    Route::delete('/categories/{category}',          [CategoriesController::class, 'destroy'])->name('categories.destroy');
-    Route::patch('/categories/{category}/toggle',    [CategoriesController::class, 'toggleActive'])->name('categories.toggle');
+    Route::get('/categories',                     [CategoriesController::class, 'index'])->name('categories');
+    Route::get('/categories/list',                [CategoriesController::class, 'list'])->name('categories.list');
+    Route::post('/categories',                    [CategoriesController::class, 'store'])->name('categories.store');
+    Route::get('/categories/{category}',          [CategoriesController::class, 'show'])->name('categories.show');
+    Route::put('/categories/{category}',          [CategoriesController::class, 'update'])->name('categories.update');
+    Route::delete('/categories/{category}',       [CategoriesController::class, 'destroy'])->name('categories.destroy');
+    Route::patch('/categories/{category}/toggle', [CategoriesController::class, 'toggleActive'])->name('categories.toggle');
 
     // Customers
     Route::get('/customers',           [CustomersController::class, 'index'])->name('customers');
@@ -156,7 +164,7 @@ Route::get('/search', [SearchController::class, 'index'])->name('search');
 Route::get('/contact', [EnquiryController::class, 'create'])->name('contact');
 Route::post('/enquiry', [EnquiryController::class, 'store'])->name('enquiry.store');
 
-Route::post('/newsletter/subscribe', [NewsletterController::class, 'subscribe'])->name('newsletter.subscribe');
+Route::post('/newsletter/subscribe', [NewsLetterController::class, 'subscribe'])->name('newsletter.subscribe');
 
 Route::get('/track-order', [OrderController::class, 'track'])->name('track.order');
 Route::post('/track-order', [OrderController::class, 'trackResult'])->name('track.order.result');
