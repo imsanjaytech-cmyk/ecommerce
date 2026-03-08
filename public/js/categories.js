@@ -1,55 +1,66 @@
+/**
+ * categories.js
+ * Admin categories management — AJAX CRUD.
+ * No parent/subcategory logic (fParent removed entirely).
+ * Place at: public/js/categories.js
+ */
+
 (function () {
     'use strict';
 
+    /* ─── STATE ─── */
     const state = {
-        categories:       [],  
-        filtered:         [],  
+        categories:       [],
+        filtered:         [],
         search:           '',
-        statusFilter:     '',   
+        statusFilter:     '',
         editingId:        null,
         deleteTargetId:   null,
         deleteTargetName: '',
         debounceTimer:    null,
     };
 
+    /* ─── DOM HELPERS ─── */
     const $ = id => document.getElementById(id);
 
-    const grid          = $('categoriesGrid');
-    const gridLoader    = $('gridLoader');
-    const searchInput   = $('catSearchInput');
-    const statusFilter  = $('catStatusFilter');
+    const grid           = $('categoriesGrid');
+    const gridLoader     = $('gridLoader');
+    const searchInput    = $('catSearchInput');
+    const statusFilter   = $('catStatusFilter');
 
-    const catModal      = new bootstrap.Modal($('catModal'));
-    const deleteModal   = new bootstrap.Modal($('deleteCatModal'));
+    const catModal       = new bootstrap.Modal($('catModal'));
+    const deleteModal    = new bootstrap.Modal($('deleteCatModal'));
 
-    const catModalTitle = $('catModalTitle');
-    const catId         = $('catId');
-    const catForm       = $('catForm');
-    const catFormErrors = $('catFormErrors');
-    const saveCatBtn    = $('saveCatBtn');
-    const saveCatText   = $('saveCatText');
-    const saveCatSpinner= $('saveCatSpinner');
+    const catModalTitle  = $('catModalTitle');
+    const catId          = $('catId');
+    const catForm        = $('catForm');
+    const catFormErrors  = $('catFormErrors');
+    const saveCatBtn     = $('saveCatBtn');
+    const saveCatText    = $('saveCatText');
+    const saveCatSpinner = $('saveCatSpinner');
 
-    const fName         = $('f_cat_name');
-    const fSlug         = $('f_cat_slug');
-    const fDesc         = $('f_cat_description');
-    const fIcon         = $('f_cat_icon');
-    const fColor        = $('f_cat_color');
-    const fColorPicker  = $('f_cat_color_picker');
-    const fActive       = $('f_cat_active');
-    const iconPreviewI  = $('iconPreviewI');
+    const fName          = $('f_cat_name');
+    const fSlug          = $('f_cat_slug');
+    const fDesc          = $('f_cat_description');
+    const fIcon          = $('f_cat_icon');
+    const fColor         = $('f_cat_color');
+    const fColorPicker   = $('f_cat_color_picker');
+    const fActive        = $('f_cat_active');
+    const iconPreviewI   = $('iconPreviewI');
 
     const deleteCatName    = $('deleteCatName');
     const deleteCatWarning = $('deleteCatWarning');
     const confirmDeleteBtn = $('confirmDeleteCatBtn');
     const deleteCatSpinner = $('deleteCatSpinner');
 
-
+    /* ═══════════════════════════════════════════════════════
+     |  UTILS
+    ═══════════════════════════════════════════════════════ */
     function esc(str) {
         if (!str) return '';
         return String(str)
-            .replace(/&/g,'&amp;').replace(/</g,'&lt;')
-            .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     }
 
     function toast(message, type = 'success') {
@@ -61,9 +72,9 @@
             document.body.appendChild(container);
         }
         const colors = {
-            success: { bg:'#e8f8ee', border:'#1f9c4a', text:'#1f9c4a', icon:'bi-check-circle-fill' },
-            error:   { bg:'#fee8eb', border:'#dc3545', text:'#dc3545', icon:'bi-x-circle-fill' },
-            info:    { bg:'#e8f4ff', border:'#1a7cd4', text:'#1a7cd4', icon:'bi-info-circle-fill' },
+            success: { bg: '#e8f8ee', border: '#1f9c4a', text: '#1f9c4a', icon: 'bi-check-circle-fill' },
+            error:   { bg: '#fee8eb', border: '#dc3545', text: '#dc3545', icon: 'bi-x-circle-fill' },
+            info:    { bg: '#e8f4ff', border: '#1a7cd4', text: '#1a7cd4', icon: 'bi-info-circle-fill' },
         };
         const c = colors[type] || colors.info;
         const t = document.createElement('div');
@@ -75,11 +86,13 @@
         t.innerHTML = `<i class="bi ${c.icon}" style="font-size:16px;flex-shrink:0;"></i><span>${message}</span>`;
         container.appendChild(t);
         setTimeout(() => {
-            t.style.opacity = '0'; t.style.transition = 'opacity .3s';
+            t.style.opacity = '0';
+            t.style.transition = 'opacity .3s';
             setTimeout(() => t.remove(), 300);
         }, 3200);
     }
 
+    /* Inject keyframe once */
     if (!document.getElementById('cat-anim-style')) {
         const s = document.createElement('style');
         s.id = 'cat-anim-style';
@@ -88,20 +101,31 @@
     }
 
     function hexWithAlpha(hex, alpha) {
-        const r = parseInt(hex.slice(1,3),16);
-        const g = parseInt(hex.slice(3,5),16);
-        const b = parseInt(hex.slice(5,7),16);
+        const r = parseInt(hex.slice(1, 3), 16);
+        const g = parseInt(hex.slice(3, 5), 16);
+        const b = parseInt(hex.slice(5, 7), 16);
         return `rgba(${r},${g},${b},${alpha})`;
     }
 
+    /* ═══════════════════════════════════════════════════════
+     |  STATS BAR
+    ═══════════════════════════════════════════════════════ */
     function refreshStats() {
         const cats = state.categories;
-        $('stat-total').textContent    = cats.length;
-        $('stat-active').textContent   = cats.filter(c => c.is_active).length;
-        $('stat-products').textContent = cats.reduce((sum, c) => sum + (c.products_count || 0), 0);
-        $('stat-parents').textContent  = cats.filter(c => !c.parent_id).length;
+        const statTotal    = $('stat-total');
+        const statActive   = $('stat-active');
+        const statProducts = $('stat-products');
+        const statParents  = $('stat-parents');
+
+        if (statTotal)    statTotal.textContent    = cats.length;
+        if (statActive)   statActive.textContent   = cats.filter(c => c.is_active).length;
+        if (statProducts) statProducts.textContent = cats.reduce((sum, c) => sum + (c.products_count || 0), 0);
+        if (statParents)  statParents.textContent  = cats.length; // all are top-level now
     }
 
+    /* ═══════════════════════════════════════════════════════
+     |  LOAD
+    ═══════════════════════════════════════════════════════ */
     function loadCategories() {
         if (gridLoader) gridLoader.style.display = 'flex';
 
@@ -124,14 +148,17 @@
         });
     }
 
+    /* ═══════════════════════════════════════════════════════
+     |  FILTER + RENDER
+    ═══════════════════════════════════════════════════════ */
     function applyFilter() {
         let list = [...state.categories];
 
         if (state.search) {
             const q = state.search.toLowerCase();
             list = list.filter(c =>
-                (c.name  || '').toLowerCase().includes(q) ||
-                (c.slug  || '').toLowerCase().includes(q) ||
+                (c.name        || '').toLowerCase().includes(q) ||
+                (c.slug        || '').toLowerCase().includes(q) ||
                 (c.description || '').toLowerCase().includes(q)
             );
         }
@@ -146,6 +173,7 @@
     function renderGrid(cats) {
         if (gridLoader) gridLoader.style.display = 'none';
 
+        /* Remove all cards except the loader skeleton */
         [...grid.children].forEach(el => {
             if (el.id !== 'gridLoader') el.remove();
         });
@@ -164,41 +192,41 @@
         }
 
         cats.forEach((c, idx) => {
-            const col = document.createElement('div');
+            const col   = document.createElement('div');
             col.className = 'col-md-4 col-sm-6';
             col.style.animationDelay = `${idx * 40}ms`;
 
-            const color  = c.color  || '#9199a6';
-            const icon   = c.icon   || 'bi-tag';
-            const bgSoft = hexWithAlpha(color, 0.10);
+            const color    = c.color || '#9199a6';
+            const icon     = c.icon  || 'bi-tag';
+            const bgSoft   = hexWithAlpha(color, 0.10);
             const bgBorder = hexWithAlpha(color, 0.15);
-
-            const parent = c.parent_id
-                ? state.categories.find(p => p.id === c.parent_id)
-                : null;
 
             col.innerHTML = `
                 <div class="cat-card" style="--cat-color:${color};" data-id="${c.id}">
                     <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;">
                         <div style="display:flex;align-items:center;gap:12px;min-width:0;">
                             <div class="cat-icon-wrap"
-                                style="background:${bgSoft};border:1.5px solid ${bgBorder};">
+                                 style="background:${bgSoft};border:1.5px solid ${bgBorder};">
                                 <i class="bi ${esc(icon)}" style="color:${esc(color)};"></i>
                             </div>
                             <div style="min-width:0;">
                                 <div class="cat-name">${esc(c.name)}</div>
                                 <div class="cat-slug">/${esc(c.slug)}</div>
-                                ${parent ? `<div style="font-size:10.5px;margin-top:2px;"><span style="color:var(--text-muted);">Under:</span> <span style="color:var(--primary);font-weight:600;">${esc(parent.name)}</span></div>` : ''}
                             </div>
                         </div>
                         <div style="display:flex;gap:5px;flex-shrink:0;margin-left:8px;">
                             <div class="act-btn cat-edit-btn" data-id="${c.id}" title="Edit" style="opacity:1;">
                                 <i class="bi bi-pencil"></i>
                             </div>
-                            <div class="cat-toggle-btn toggle-btn" data-id="${c.id}" title="${c.is_active ? 'Deactivate' : 'Activate'}" style="opacity:1;">
+                            <div class="act-btn cat-toggle-btn" data-id="${c.id}"
+                                 title="${c.is_active ? 'Deactivate' : 'Activate'}" style="opacity:1;">
                                 <i class="bi ${c.is_active ? 'bi-eye-slash' : 'bi-eye'}"></i>
                             </div>
-                            <div class="act-btn del cat-delete-btn" data-id="${c.id}" data-name="${esc(c.name)}" data-products="${c.products_count || 0}" title="Delete" style="opacity:1;">
+                            <div class="act-btn del cat-delete-btn"
+                                 data-id="${c.id}"
+                                 data-name="${esc(c.name)}"
+                                 data-products="${c.products_count || 0}"
+                                 title="Delete" style="opacity:1;">
                                 <i class="bi bi-trash"></i>
                             </div>
                         </div>
@@ -211,7 +239,7 @@
                     </p>` : ''}
 
                     <div style="display:flex;align-items:center;justify-content:space-between;
-                        padding-top:12px;border-top:1px solid var(--border-col);">
+                                padding-top:12px;border-top:1px solid var(--border-col);">
                         <div style="display:flex;align-items:center;gap:6px;">
                             <i class="bi bi-box-seam" style="color:var(--text-muted);font-size:12px;"></i>
                             <span style="font-size:12.5px;color:var(--text-muted);font-weight:600;">
@@ -227,19 +255,22 @@
             grid.appendChild(col);
         });
 
-        grid.querySelectorAll('.cat-edit-btn').forEach(btn => {
-            btn.addEventListener('click', () => openEditModal(parseInt(btn.dataset.id)));
-        });
-        grid.querySelectorAll('.cat-delete-btn').forEach(btn => {
+        /* Bind row-level events */
+        grid.querySelectorAll('.cat-edit-btn').forEach(btn =>
+            btn.addEventListener('click', () => openEditModal(parseInt(btn.dataset.id)))
+        );
+        grid.querySelectorAll('.cat-delete-btn').forEach(btn =>
             btn.addEventListener('click', () =>
-                openDeleteModal(parseInt(btn.dataset.id), btn.dataset.name, parseInt(btn.dataset.products)));
-        });
-        grid.querySelectorAll('.toggle-btn').forEach(btn => {
-            btn.addEventListener('click', () => toggleActive(parseInt(btn.dataset.id)));
-        });
+                openDeleteModal(parseInt(btn.dataset.id), btn.dataset.name, parseInt(btn.dataset.products || 0)))
+        );
+        grid.querySelectorAll('.cat-toggle-btn').forEach(btn =>
+            btn.addEventListener('click', () => toggleActive(parseInt(btn.dataset.id)))
+        );
     }
 
-
+    /* ═══════════════════════════════════════════════════════
+     |  MODAL — OPEN ADD
+    ═══════════════════════════════════════════════════════ */
     function openAddModal() {
         state.editingId = null;
         catId.value = '';
@@ -249,6 +280,9 @@
         catModal.show();
     }
 
+    /* ═══════════════════════════════════════════════════════
+     |  MODAL — OPEN EDIT
+    ═══════════════════════════════════════════════════════ */
     function openEditModal(id) {
         state.editingId = id;
         catId.value = id;
@@ -260,7 +294,7 @@
         saveCatText.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Loading...';
 
         fetch(window.CAT.routes.show(id), {
-            headers: { 'Accept':'application/json','X-CSRF-TOKEN':window.CAT.csrf }
+            headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': window.CAT.csrf }
         })
         .then(r => r.json())
         .then(res => {
@@ -277,6 +311,25 @@
         catModal.show();
     }
 
+    /* ═══════════════════════════════════════════════════════
+     |  FILL FORM  (no parent field)
+    ═══════════════════════════════════════════════════════ */
+    function fillCatForm(c) {
+        fName.value        = c.name        || '';
+        fSlug.value        = c.slug        || '';
+        fDesc.value        = c.description || '';
+        fIcon.value        = c.icon        || '';
+        fColor.value       = c.color       || '';
+        fActive.checked    = !!c.is_active;
+        fColorPicker.value = c.color       || '#ff4d6d';
+
+        updateIconPreview(c.icon);
+        updateColorSwatches(c.color);
+    }
+
+    /* ═══════════════════════════════════════════════════════
+     |  DELETE MODAL
+    ═══════════════════════════════════════════════════════ */
     function openDeleteModal(id, name, productsCount) {
         state.deleteTargetId   = id;
         state.deleteTargetName = name;
@@ -294,45 +347,23 @@
         deleteModal.show();
     }
 
-    function fillCatForm(c) {
-        fName.value          = c.name        || '';
-        fSlug.value          = c.slug        || '';
-        fDesc.value          = c.description || '';
-        fIcon.value          = c.icon        || '';
-        fColor.value         = c.color       || '';
-        fActive.checked      = !!c.is_active;
-        fColorPicker.value   = c.color       || '#ff4d6d';
-
-        // Set parent — exclude self from options
-        fParent.innerHTML = '<option value="">None (Top Level)</option>';
-        state.categories
-            .filter(cat => !cat.parent_id && cat.id !== c.id)
-            .forEach(cat => {
-                const opt = document.createElement('option');
-                opt.value = cat.id;
-                opt.textContent = cat.name;
-                if (cat.id === c.parent_id) opt.selected = true;
-                fParent.appendChild(opt);
-            });
-
-        updateIconPreview(c.icon);
-        updateColorSwatches(c.color);
-    }
-
+    /* ═══════════════════════════════════════════════════════
+     |  SAVE (create / update)
+    ═══════════════════════════════════════════════════════ */
     function saveCategory() {
         clearCatErrors();
 
         const payload = {
             name:        fName.value.trim(),
-            slug:        fSlug.value.trim() || null,
-            description: fDesc.value.trim() || null,
-            icon:        fIcon.value.trim() || null,
+            slug:        fSlug.value.trim()  || null,
+            description: fDesc.value.trim()  || null,
+            icon:        fIcon.value.trim()  || null,
             color:       fColor.value.trim() || null,
             is_active:   fActive.checked ? 1 : 0,
         };
 
         if (!payload.name) {
-            showCatError('cat_name', 'Category name is required.');
+            showCatError('name', 'Category name is required.');
             return;
         }
 
@@ -340,15 +371,15 @@
         const url    = isEdit ? window.CAT.routes.update(state.editingId) : window.CAT.routes.store;
         const method = isEdit ? 'PUT' : 'POST';
 
-        saveCatBtn.disabled       = true;
-        saveCatText.style.display = 'none';
+        saveCatBtn.disabled          = true;
+        saveCatText.style.display    = 'none';
         saveCatSpinner.style.display = 'inline-block';
 
         fetch(url, {
             method,
             headers: {
                 'Content-Type': 'application/json',
-                'Accept': 'application/json',
+                'Accept':       'application/json',
                 'X-CSRF-TOKEN': window.CAT.csrf,
             },
             body: JSON.stringify(payload),
@@ -365,11 +396,12 @@
         })
         .catch(err => {
             if (err.errors) {
-                Object.entries(err.errors).forEach(([field, msgs]) => {
-                    showCatError(field, msgs[0]);
-                });
+                Object.entries(err.errors).forEach(([field, msgs]) =>
+                    showCatError(field, msgs[0])
+                );
                 catFormErrors.style.display = 'block';
-                catFormErrors.innerHTML = '<i class="bi bi-exclamation-circle me-1"></i>' + (err.message || 'Please fix the errors below.');
+                catFormErrors.innerHTML = '<i class="bi bi-exclamation-circle me-1"></i>' +
+                    (err.message || 'Please fix the errors below.');
             } else {
                 toast(err.message || 'An error occurred.', 'error');
             }
@@ -381,14 +413,17 @@
         });
     }
 
+    /* ═══════════════════════════════════════════════════════
+     |  CONFIRM DELETE
+    ═══════════════════════════════════════════════════════ */
     function confirmDelete() {
         if (!state.deleteTargetId) return;
-        confirmDeleteBtn.disabled = true;
+        confirmDeleteBtn.disabled      = true;
         deleteCatSpinner.style.display = 'inline-block';
 
         fetch(window.CAT.routes.destroy(state.deleteTargetId), {
             method: 'DELETE',
-            headers: { 'Accept':'application/json','X-CSRF-TOKEN':window.CAT.csrf }
+            headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': window.CAT.csrf }
         })
         .then(r => r.json())
         .then(res => {
@@ -397,9 +432,7 @@
             toast(res.message, 'success');
             loadCategories();
         })
-        .catch(err => {
-            toast(err.message || 'Failed to delete category.', 'error');
-        })
+        .catch(err => toast(err.message || 'Failed to delete category.', 'error'))
         .finally(() => {
             confirmDeleteBtn.disabled      = false;
             deleteCatSpinner.style.display = 'none';
@@ -407,11 +440,13 @@
         });
     }
 
-
+    /* ═══════════════════════════════════════════════════════
+     |  TOGGLE ACTIVE
+    ═══════════════════════════════════════════════════════ */
     function toggleActive(id) {
         fetch(window.CAT.routes.toggle(id), {
             method: 'PATCH',
-            headers: { 'Accept':'application/json','X-CSRF-TOKEN':window.CAT.csrf }
+            headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': window.CAT.csrf }
         })
         .then(r => r.json())
         .then(res => {
@@ -425,11 +460,12 @@
         .catch(err => toast(err.message || 'Toggle failed.', 'error'));
     }
 
-
+    /* ═══════════════════════════════════════════════════════
+     |  FORM HELPERS
+    ═══════════════════════════════════════════════════════ */
     function showCatError(field, message) {
-        const key    = field.replace(/^cat_/, '');
-        const errEl  = $(`err_cat_${key}`);
-        const inpEl  = $(`f_cat_${key}`);
+        const errEl = $(`err_cat_${field}`);
+        const inpEl = $(`f_cat_${field}`);
         if (errEl) errEl.textContent = message;
         if (inpEl) inpEl.classList.add('is-invalid');
     }
@@ -443,8 +479,8 @@
     function resetCatForm() {
         catForm.reset();
         clearCatErrors();
-        catId.value = '';
-        fActive.checked = true;
+        catId.value        = '';
+        fActive.checked    = true;
         fColorPicker.value = '#ff4d6d';
         updateIconPreview('bi-tag');
         updateColorSwatches('');
@@ -454,7 +490,7 @@
         if (!iconClass) iconClass = 'bi-tag';
         iconClass = iconClass.replace(/^bi\s+/, '').trim();
         if (!iconClass.startsWith('bi-')) iconClass = 'bi-' + iconClass;
-        iconPreviewI.className = `bi ${iconClass}`;
+        if (iconPreviewI) iconPreviewI.className = `bi ${iconClass}`;
     }
 
     function updateColorSwatches(color) {
@@ -471,7 +507,9 @@
         applyFilter();
     }
 
-
+    /* ═══════════════════════════════════════════════════════
+     |  BIND EVENTS
+    ═══════════════════════════════════════════════════════ */
     function bindEvents() {
         $('addCatBtn').addEventListener('click', openAddModal);
         saveCatBtn.addEventListener('click', saveCategory);
@@ -492,21 +530,23 @@
             applyFilter();
         });
 
+        /* Icon preview */
         fIcon.addEventListener('input', () => updateIconPreview(fIcon.value));
 
+        /* Color text input → sync picker + swatches */
         fColor.addEventListener('input', () => {
             const val = fColor.value.trim();
-            if (/^#[0-9a-fA-F]{6}$/.test(val)) {
-                fColorPicker.value = val;
-            }
+            if (/^#[0-9a-fA-F]{6}$/.test(val)) fColorPicker.value = val;
             updateColorSwatches(val);
         });
 
+        /* Color picker → sync text input + swatches */
         fColorPicker.addEventListener('input', () => {
             fColor.value = fColorPicker.value;
             updateColorSwatches(fColorPicker.value);
         });
 
+        /* Color swatches */
         document.querySelectorAll('.color-swatch').forEach(sw => {
             sw.addEventListener('click', () => {
                 const color = sw.dataset.color;
@@ -516,8 +556,9 @@
             });
         });
 
+        /* Auto-slug from name (add mode only) */
         fName.addEventListener('input', () => {
-            if (!catId.value) {   
+            if (!catId.value) {
                 fSlug.value = fName.value.trim()
                     .toLowerCase()
                     .replace(/[^a-z0-9\s-]/g, '')
@@ -529,16 +570,20 @@
             if (e) e.textContent = '';
         });
 
+        /* Clear inline errors on any input change */
         catForm.querySelectorAll('.inp').forEach(inp => {
             inp.addEventListener('input', () => {
                 inp.classList.remove('is-invalid');
-                const field = inp.id ? inp.id.replace('f_cat_','') : '';
+                const field = (inp.id || '').replace('f_cat_', '');
                 const errEl = $(`err_cat_${field}`);
                 if (errEl) errEl.textContent = '';
             });
         });
     }
 
+    /* ═══════════════════════════════════════════════════════
+     |  INIT
+    ═══════════════════════════════════════════════════════ */
     function init() {
         bindEvents();
         loadCategories();
