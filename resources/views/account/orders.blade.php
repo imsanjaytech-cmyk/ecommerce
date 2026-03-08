@@ -224,7 +224,6 @@ body { background: var(--page-bg); font-family: var(--font); margin: 0; }
 .st-unpaid     { background: #fff5e8; color: #b45309; }
 .st-failed     { background: #fef2f2; color: #b91c1c; }
 
-/* Tracking bar */
 .o-track-bar {
     padding: 12px 16px 10px; background: var(--pink-soft); border-bottom: 1px solid var(--pink-bd);
     display: flex; align-items: center; gap: 10px;
