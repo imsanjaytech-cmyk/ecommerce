@@ -5,35 +5,18 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Storage;
 
 class Product extends Model
 {
     protected $fillable = [
-        'name',
-        'slug',
-        'short_description',
-        'description',
-        'sku',
-        'barcode',
-        'regular_price',
-        'sale_price',
-        'cost_price',
-        'tax_class',
-        'stock_quantity',
-        'low_stock_threshold',
-        'manage_stock',
-        'stock_status',
-        'weight',
-        'length',
-        'width',
-        'height',
-        'category_id',
-        'brand',
-        'tags',
-        'thumbnail',
-        'status',
-        'is_featured',
-        'total_sales',
+        'name', 'slug', 'short_description', 'description',
+        'sku', 'barcode',
+        'regular_price', 'sale_price', 'cost_price', 'tax_class',
+        'stock_quantity', 'low_stock_threshold', 'manage_stock', 'stock_status',
+        'weight', 'length', 'width', 'height',
+        'category_id', 'brand', 'tags',
+        'thumbnail', 'status', 'is_featured', 'total_sales',
     ];
 
     protected $casts = [
@@ -47,6 +30,7 @@ class Product extends Model
         'total_sales'         => 'integer',
     ];
 
+    // ─── Relationships ────────────────────────────────────────────────────────
 
     public function category(): BelongsTo
     {
@@ -58,6 +42,8 @@ class Product extends Model
         return $this->hasMany(ProductImage::class)->orderBy('sort_order');
     }
 
+    // ─── Scopes ───────────────────────────────────────────────────────────────
+
     public function scopePublished($query)
     {
         return $query->where('status', 'published');
@@ -67,6 +53,8 @@ class Product extends Model
     {
         return $query->where('is_featured', true);
     }
+
+    // ─── Accessors ────────────────────────────────────────────────────────────
 
     public function getThumbnailUrlAttribute(): string
     {
@@ -80,7 +68,9 @@ class Product extends Model
             return $thumb;
         }
 
-        return asset('storage/' . str_replace('\\', '/', $thumb));
+        $path = str_replace('\\', '/', $thumb);
+
+        return asset('storage/' . $path);
     }
 
     public function getGalleryUrlsAttribute(): array
@@ -90,9 +80,27 @@ class Product extends Model
         $urls[] = $this->thumbnail_url;
 
         foreach ($this->productImages as $img) {
-            $url = $img->url;
-            if ($url && ! in_array($url, $urls)) {
-                $urls[] = $url;
+            $path = $img->path ?? '';
+
+            if (empty($path)) {
+                continue;
+            }
+
+            $parts = preg_split('/(?=products\/)/', $path, -1, PREG_SPLIT_NO_EMPTY);
+
+            foreach ($parts as $part) {
+                $clean = $this->cleanPath($part);
+
+                if (empty($clean)) {
+                    continue;
+                }
+
+                if (Storage::disk('public')->exists($clean)) {
+                    $url = asset('storage/' . $clean);
+                    if (! in_array($url, $urls)) {
+                        $urls[] = $url;
+                    }
+                }
             }
         }
 
@@ -144,6 +152,7 @@ class Product extends Model
         );
     }
 
+    // CSS class only → use as: class="bdg {{ $product->stock_badge }}"
     public function getStockBadgeAttribute(): string
     {
         return match ($this->stock_status) {
@@ -154,6 +163,7 @@ class Product extends Model
         };
     }
 
+    // Display text → use as: {{ $product->stock_label }}
     public function getStockLabelAttribute(): string
     {
         return match ($this->stock_status) {
@@ -164,6 +174,7 @@ class Product extends Model
         };
     }
 
+    // CSS class only → use as: class="bdg {{ $product->status_badge }}"
     public function getStatusBadgeAttribute(): string
     {
         return match ($this->status) {
@@ -185,6 +196,7 @@ class Product extends Model
         };
     }
 
+    // ─── Mutators ─────────────────────────────────────────────────────────────
 
     public function setStockQuantityAttribute(int $value): void
     {
@@ -198,6 +210,22 @@ class Product extends Model
         };
     }
 
+    // ─── Private helpers ──────────────────────────────────────────────────────
+
+    private function cleanPath(string $path): string
+    {
+        $path = str_replace('\\', '/', $path);
+        $path = preg_replace('#^storage/app/public/#', '', $path);
+        $path = preg_replace('#^storage/#', '', $path);
+        $path = preg_replace('#^public/#', '', $path);
+        $path = ltrim($path, '/');
+
+        if (! str_contains($path, '/')) {
+            $path = 'products/thumbnails/' . $path;
+        }
+
+        return $path;
+    }
 
     private function placeholder(): string
     {
