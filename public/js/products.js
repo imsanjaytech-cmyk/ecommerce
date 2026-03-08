@@ -766,29 +766,11 @@
         });
 
         $('productModal').addEventListener('hidden.bs.modal', resetForm);
-
-        // Mobile sidebar toggle
-        const sidebarToggle = $('sidebarToggle');
-        if (sidebarToggle) {
-            sidebarToggle.addEventListener('click', () => {
-                document.querySelector('.sidebar').classList.toggle('open');
-            });
-            // Close sidebar when clicking outside on mobile
-            document.addEventListener('click', e => {
-                const sidebar = document.querySelector('.sidebar');
-                if (sidebar && sidebar.classList.contains('open') &&
-                    !sidebar.contains(e.target) && !sidebarToggle.contains(e.target)) {
-                    sidebar.classList.remove('open');
-                }
-            });
-        }
     }
-
-    // ─── Init ──────────────────────────────────────────────────────────────────
 
     function init() {
         bindEvents();
-        loadCategories(); // load categories dynamically first
+        loadCategories();
         loadProducts();
     }
 
