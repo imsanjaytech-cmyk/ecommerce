@@ -60,11 +60,11 @@
             <div class="sec-sub" id="tableSubtitle">Loading...</div>
         </div>
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-            <div class="search-wrap" style="width:240px;">
+            <div class="search-wrap" style="width:200px;">
                 <i class="bi bi-search"></i>
                 <input type="text" id="searchInput" placeholder="Name or SKU...">
             </div>
-            <select class="inp" id="categoryFilter" style="width:150px;padding:8px 12px;">
+            <select class="inp" id="categoryFilter" style="width:140px;padding:8px 12px;">
                 <option value="">All Categories</option>
                 @foreach($categories as $cat)
                     <option value="{{ $cat->id }}">{{ $cat->name }}</option>
@@ -78,20 +78,28 @@
         </div>
     </div>
 
-    <div style="overflow-x:auto;">
+    {{--
+        FIX: Wrap table in overflow-x:auto so it scrolls horizontally on small screens
+        instead of breaking layout. The inner table has a min-width so columns never squash.
+        Columns are progressively hidden at breakpoints so the most important data
+        (Product name, Price, Stock, Status, Actions) always shows.
+    --}}
+    <div class="tbl-outer">
         <table class="tbl">
             <thead>
                 <tr>
-                    <th style="width:38px;"><input type="checkbox" id="selectAll" style="accent-color:var(--primary);cursor:pointer;"></th>
+                    <th style="width:38px;">
+                        <input type="checkbox" id="selectAll" style="accent-color:var(--primary);cursor:pointer;">
+                    </th>
                     <th>Product</th>
-                    <th>SKU</th>
-                    <th>Category</th>
+                    <th class="col-sku">SKU</th>
+                    <th class="col-cat">Category</th>
                     <th>Price</th>
                     <th>Stock</th>
                     <th>Status</th>
-                    <th>Sales</th>
-                    <th>Featured</th>
-                    <th></th>
+                    <th class="col-sales">Sales</th>
+                    <th class="col-feat">Featured</th>
+                    <th style="width:80px;"></th>
                 </tr>
             </thead>
             <tbody id="productsBody">
@@ -112,6 +120,7 @@
 </div>
 
 
+{{-- ── ADD / EDIT MODAL ── --}}
 <div class="modal fade" id="productModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
     <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content">
@@ -170,7 +179,7 @@
                                             <div class="col-md-4">
                                                 <label class="lbl">Regular Price <span style="color:var(--primary)">*</span></label>
                                                 <div style="position:relative;">
-                                                    <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:13px;font-weight:600;">$</span>
+                                                    <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:13px;font-weight:600;"> {{ $currency }}</span>
                                                     <input type="number" step="0.01" min="0" class="inp" name="regular_price" id="f_regular_price" placeholder="0.00" style="padding-left:26px;">
                                                 </div>
                                                 <div class="field-err" id="err_regular_price"></div>
@@ -178,14 +187,14 @@
                                             <div class="col-md-4">
                                                 <label class="lbl">Sale Price</label>
                                                 <div style="position:relative;">
-                                                    <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:13px;font-weight:600;">$</span>
+                                                    <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:13px;font-weight:600;"> {{ $currency }}</span>
                                                     <input type="number" step="0.01" min="0" class="inp" name="sale_price" id="f_sale_price" placeholder="0.00" style="padding-left:26px;">
                                                 </div>
                                             </div>
                                             <div class="col-md-4">
                                                 <label class="lbl">Cost Price</label>
                                                 <div style="position:relative;">
-                                                    <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:13px;font-weight:600;">$</span>
+                                                    <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:13px;font-weight:600;"> {{ $currency }}</span>
                                                     <input type="number" step="0.01" min="0" class="inp" name="cost_price" id="f_cost_price" placeholder="0.00" style="padding-left:26px;">
                                                 </div>
                                             </div>
@@ -335,6 +344,7 @@
     </div>
 </div>
 
+{{-- ── DELETE CONFIRM MODAL ── --}}
 <div class="modal fade" id="deleteModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered" style="max-width:420px;">
         <div class="modal-content">
@@ -359,9 +369,95 @@
     </div>
 </div>
 
-<div id="toastContainer" style="position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column-reverse;gap:8px;pointer-events:none;"></div>
-
 <style>
+.tbl-outer {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
+    scrollbar-width: thin;
+    scrollbar-color: var(--pink-mid) transparent;
+}
+.tbl-outer::-webkit-scrollbar { height: 4px; }
+.tbl-outer::-webkit-scrollbar-thumb { background: var(--pink-mid); border-radius: 4px; }
+
+.tbl {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.tbl thead tr { border-bottom: 1.5px solid var(--border-col); }
+
+.tbl th {
+    padding: 10px 12px;
+    font-size: 10.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--text-muted);
+    text-align: left;
+    white-space: nowrap;
+    background: var(--white); 
+}
+
+.tbl td {
+    padding: 12px 12px;
+    font-size: 13px;
+    border-bottom: 1px solid #f4f5f8;
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+.tbl tbody tr:last-child td { border-bottom: none; }
+.tbl tbody tr { transition: background 0.15s; }
+.tbl tbody tr:hover { background: var(--pink-soft); }
+
+.tbl td.td-product { white-space: normal; min-width: 160px; max-width: 240px; }
+.tbl td.td-product .prod-name {
+    font-weight: 600;
+    color: var(--dark);
+    font-size: 13px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    white-space: normal;
+}
+.tbl td.td-product .prod-brand {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+@media (max-width: 767px) {
+    .tbl th { padding: 8px 10px; font-size: 10px; }
+    .tbl td { padding: 10px 10px; font-size: 12px; }
+}
+
+@media (max-width: 575px) {
+    .col-thumb { display: none; }
+    .tbl td.td-product { min-width: 120px; }
+    .tbl th { padding: 8px 8px; }
+    .tbl td { padding: 9px 8px; }
+}
+
+.prod-thumb {
+    width: 40px; height: 40px;
+    border-radius: 9px;
+    object-fit: cover;
+    border: 1.5px solid var(--border-col);
+    background: var(--bg-page);
+    flex-shrink: 0;
+}
+.prod-thumb-placeholder {
+    width: 40px; height: 40px;
+    border-radius: 9px;
+    background: var(--pink-soft);
+    border: 1.5px solid var(--pink-border);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--secondary); font-size: 16px;
+    flex-shrink: 0;
+}
+
 .field-err { font-size:11.5px; color:var(--danger); margin-top:4px; min-height:16px; }
 .inp.is-invalid { border-color:var(--danger)!important; background:rgba(220,53,69,0.04)!important; }
 .inp.is-valid   { border-color:#1f9c4a!important; }
@@ -371,15 +467,15 @@
 .feat-btn:hover { color:#f7971e; transform:scale(1.2); }
 
 .img-chip {
-    position:relative;width:52px;height:52px;border-radius:8px;overflow:hidden;
-    border:1.5px solid var(--border-col);cursor:pointer;
+    position:relative; width:52px; height:52px; border-radius:8px; overflow:hidden;
+    border:1.5px solid var(--border-col); cursor:pointer;
 }
-.img-chip img { width:100%;height:100%;object-fit:cover; }
+.img-chip img { width:100%; height:100%; object-fit:cover; }
 .img-chip .del-img {
-    position:absolute;top:2px;right:2px;width:16px;height:16px;
-    background:rgba(220,53,69,0.85);border-radius:50%;
-    display:flex;align-items:center;justify-content:center;
-    font-size:9px;color:white;cursor:pointer;
+    position:absolute; top:2px; right:2px; width:16px; height:16px;
+    background:rgba(220,53,69,0.85); border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-size:9px; color:white; cursor:pointer;
 }
 </style>
 
