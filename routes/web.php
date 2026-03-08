@@ -126,6 +126,14 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
 
     // Reports & Settings
     Route::get('/reports',   [ReportsController::class,  'index'])->name('reports');
-    Route::get('/settings',  [SettingsController::class, 'index'])->name('settings');
-    Route::post('/settings', [SettingsController::class, 'update'])->name('settings.update');
+    Route::get('/settings',                    [SettingsController::class, 'index'])->name('settings');
+
+    // AJAX save endpoints — one per tab
+    Route::post('/settings/profile',           [SettingsController::class, 'updateProfile'])->name('settings.profile');
+    Route::delete('/settings/avatar',          [SettingsController::class, 'removeAvatar'])->name('settings.avatar.remove');
+    Route::post('/settings/store',             [SettingsController::class, 'updateStore'])->name('settings.store');
+    Route::post('/settings/notifications',     [SettingsController::class, 'updateNotifications'])->name('settings.notifications');
+    Route::post('/settings/security',          [SettingsController::class, 'updateSecurity'])->name('settings.security');
+    Route::post('/settings/shipping',          [SettingsController::class, 'updateShipping'])->name('settings.shipping');
+    Route::post('/settings/appearance',        [SettingsController::class, 'updateAppearance'])->name('settings.appearance');
 });
