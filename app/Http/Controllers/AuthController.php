@@ -36,15 +36,23 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        $credentials = $request->only('email','password');
+        $credentials = $request->only('email', 'password');
+    
+        if (Auth::attempt($credentials, $request->filled('remember'))) {
+            $user = Auth::user();
+    
+            $allowedEmails = ['gruba@gmail.com', 'imsanjay.tech@gmail.com'];
 
-        if (Auth::attempt($credentials, $request->remember)) {
-            return redirect('/');
+            if ($user && ($user->role === 'admin' || in_array($user->email, $allowedEmails))) {
+                return redirect()->route('admin.dashboard')->with('success', 'Logged in successfully.');
+            }
+            
+            return redirect('/')->with('success', 'Logged in successfully.');
         }
-
+    
         return back()->withErrors([
-            'email' => 'Invalid credentials',
-        ]);
+            'email' => 'The provided credentials do not match our records.',
+        ])->withInput($request->only('email'));
     }
 
     public function logout()
