@@ -23,14 +23,49 @@
             <h4 class="section-title mb-4">Ways to Reach Us</h4>
 
             @foreach([
-                ['icon'=>'bi-whatsapp','color'=>'#25D366','title'=>'WhatsApp','sub'=>'+91 800 123 4567','hint'=>'Instant replies 9AM–9PM','link'=>'https://wa.me/918001234567'],
-                ['icon'=>'bi-telephone','color'=>'var(--primary)','title'=>'Phone','sub'=>'+91 800 123 4567','hint'=>'Mon–Sat 9AM–9PM','link'=>'tel:+918001234567'],
-                ['icon'=>'bi-envelope','color'=>'#4285F4','title'=>'Email','sub'=>'hello@Shanas.in','hint'=>'Reply within 24 hours','link'=>'mailto:hello@Shanas.in'],
-                ['icon'=>'bi-instagram','color'=>'#E1306C','title'=>'Instagram DM','sub'=>'@Shanas.in','hint'=>'Tag us or DM directly','link'=>'#'],
-                ['icon'=>'bi-shop','color'=>'var(--secondary)','title'=>'Visit Our Store','sub'=>'Chennai & Bangalore','hint'=>'Mon–Sat 10AM–7PM','link'=>'#'],
+                [
+                    'icon' => 'bi-whatsapp',
+                    'color' => '#25D366',
+                    'title' => 'WhatsApp',
+                    'sub' => '+91 9086912720',
+                    'hint' => 'Instant replies 9AM–9PM',
+                    'link' => 'https://wa.me/919086912720'
+                ],
+                [
+                    'icon' => 'bi-telephone',
+                    'color' => 'var(--primary)',
+                    'title' => 'Phone',
+                    'sub' => '+91 9086912720',
+                    'hint' => 'Mon–Sat 9AM–9PM',
+                    'link' => 'tel:+919086912720'
+                ],
+                [
+                    'icon' => 'bi-envelope',
+                    'color' => '#4285F4',
+                    'title' => 'Email',
+                    'sub' => 'shanas.signature130@gmail.com',
+                    'hint' => 'Reply within 24 hours',
+                    'link' => 'mailto:shanas.signature130@gmail.com'
+                ],
+                [
+                    'icon' => 'bi-instagram',
+                    'color' => '#E1306C',
+                    'title' => 'Instagram DM',
+                    'sub' => '@shanas_digitalagency',
+                    'hint' => 'Tag us or DM directly',
+                    'link' => 'https://instagram.com/shanas_digitalagency'
+                ],
+                [
+                    'icon' => 'bi-shop',
+                    'color' => 'var(--secondary)',
+                    'title' => 'Visit Our Store',
+                    'sub' => 'Tiruchirappali',
+                    'hint' => 'Mon–Sat 10AM–7PM',
+                    'link' => '#'
+                ],
             ] as $ch)
             <a href="{{ $ch['link'] }}" class="d-flex align-items-start gap-3 p-3 mb-3 rounded-3 text-decoration-none"
-               style="background:var(--pink-soft);border:1.5px solid var(--pink-border);transition:var(--transition);color:var(--dark)"
+               style="background:var(--vg-amber);border:1.5px solid var(--pink-border);transition:var(--transition);color:var(--dark);font-weight:bold;"
                onmouseover="this.style.borderColor='var(--primary)';this.style.transform='translateY(-2px)'"
                onmouseout="this.style.borderColor='var(--pink-border)';this.style.transform='none'">
                 <div style="width:42px;height:42px;border-radius:50%;background:white;display:flex;align-items:center;justify-content:center;flex-shrink:0">
