@@ -1,12 +1,9 @@
 @extends('layouts.app')
 
-@section('title', 'Shanas — Luxury Gifts & Fancy Items')
+@section('title', 'Shanas Signature — Luxury Gifts & Fancy Items')
 
 @section('content')
 
-{{-- ═══════════════════════════════════════
-     HERO
-═══════════════════════════════════════ --}}
 <section class="hero-section">
     <canvas id="heroCanvas"></canvas>
     <div class="hero-content">
@@ -20,9 +17,7 @@
     </div>
 </section>
 
-{{-- ═══════════════════════════════════════
-     CATEGORY PILLS  (from DB)
-═══════════════════════════════════════ --}}
+
 <section class="categories-section">
     <div class="container">
         <div class="categories-scroll">
@@ -70,7 +65,7 @@
             </a>
         </div>
         @else
-        <div class="text-center py-5" style="color:var(--gray);">
+        <div class="text-center py-5" style="color:#999;">
             <i class="bi bi-box-seam" style="font-size:3rem;opacity:.25;"></i>
             <p class="mt-3 mb-3">No featured products yet.</p>
             @auth
@@ -108,9 +103,6 @@
 </section>
 @endif
 
-{{-- ═══════════════════════════════════════
-     BEST SELLERS  (from DB)
-═══════════════════════════════════════ --}}
 @if($topSelling->count())
 <section class="products-section" style="padding-top:0;">
     <div class="container">
@@ -160,7 +152,7 @@
                 <span class="section-tag">Who We Are</span>
                 <h2 class="section-title">Crafted With Love,<br>Delivered With Care</h2>
                 <p class="about-desc">
-                    Shanas was born from a simple belief — that every gift should feel extraordinary.
+                    Shanas Signature was born from a simple belief — that every gift should feel extraordinary.
                     We handpick every item in our collection, working with artisans and premium brands
                     to bring you pieces that speak louder than words.
                 </p>
@@ -214,9 +206,7 @@
     </div>
 </section>
 
-{{-- ═══════════════════════════════════════
-     SERVICES / FEATURES  (static — rarely changes)
-═══════════════════════════════════════ --}}
+
 <section class="services-section">
     <div class="container">
         <div class="row g-3">
@@ -228,7 +218,7 @@
             ] as [$icon, $title, $desc])
             <div class="col-6 col-lg-3">
                 <div class="service-card text-center">
-                    <i class="bi {{ $icon }} fs-3"></i>
+                    <i class="bi {{ $icon }}"></i>
                     <div class="service-title mt-2">{{ $title }}</div>
                     <p class="service-desc small mb-0">{{ $desc }}</p>
                 </div>
@@ -238,9 +228,6 @@
     </div>
 </section>
 
-{{-- ═══════════════════════════════════════
-     TESTIMONIALS  (static — replace with DB when reviews table exists)
-═══════════════════════════════════════ --}}
 <section class="testimonials-section">
     <div class="container">
         <div class="text-center mb-4">
@@ -268,15 +255,12 @@
     </div>
 </section>
 
-{{-- ═══════════════════════════════════════
-     NEWSLETTER
-═══════════════════════════════════════ --}}
 <section class="newsletter-section">
     <div class="container">
         <div class="newsletter-inner text-center">
             <h2>Get 15% Off Your First Order</h2>
             <p style="opacity:.75;margin-bottom:24px;">Join 10,000+ happy customers. No spam, ever.</p>
-            <form id="newsletterForm">
+            <form id="newsletterForm" class="newsletter-form">
                 <input type="email" name="email" class="newsletter-input"
                        placeholder="Your email address..." required>
                 <button type="submit" class="newsletter-submit">Subscribe</button>
