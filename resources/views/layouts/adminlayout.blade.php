@@ -1180,7 +1180,9 @@
                 </button>
                 <div class="topbar-title-wrap">
                     <div class="topbar-title">@yield('page-title','Dashboard')</div>
-                    <div class="topbar-bc">@yield('breadcrumb','Home / Dashboard')</div>
+                    <div class="topbar-bc">
+                        <a href="{{ url('/') }}">Home</a> / @yield('breadcrumb','Dashboard')
+                    </div>
                 </div>
             </div>
             <div class="topbar-right">
