@@ -5,10 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Shanas — Luxury Gifts & Fancy Items')</title>
+    <title>@yield('title', 'Shanas Signature — Luxury Gifts & Fancy Items')</title>
 
     <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&family=Aladin&display=swap" rel="stylesheet">
 
     <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -26,7 +26,7 @@
 <body>
     <div class="offer-strip">
         <div class="offer-strip-items">
-            <span class="offer-strip-item"><i class="bi bi-truck"></i> Free Delivery Above ₹1,500</span>
+            <span class="offer-strip-item"><i class="bi bi-truck"></i> Free Delivery Above ₹999</span>
             <span class="offer-strip-item"><i class="bi bi-gift"></i> Complimentary Gift Wrapping</span>
             <span class="offer-strip-item"><i class="bi bi-arrow-counterclockwise"></i> 30-Day Easy Returns</span>
             <span class="offer-strip-item"><i class="bi bi-shield-check"></i> 100% Secure Checkout</span>
@@ -37,7 +37,10 @@
     <nav class="navbar navbar-expand-lg navbar-light">
         <div class="container">
             <a class="navbar-brand" href="{{ route('home') }}">
-                Sha<span>nas</span>
+                <div class="d-flex align-items-center gap-2">
+                    <img src="images/logo2.png" alt="Shanas Signature Logo" class="brand-logo">
+                    <h1 class="brand-name mb-0">Shana's Signature</h1>
+                </div>
             </a>
 
             <button class="navbar-toggler border-0 shadow-none" type="button"
@@ -99,7 +102,7 @@
                             <i class="bi bi-person-fill"></i>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg rounded-3 p-2">
-                            
+
                             @if(auth()->user()->role == 'admin')
                             <li><a class="dropdown-item rounded-2 py-2" href="{{ route('admin.dashboard') }}">Admin Dashboard</a></li>
                             @else
@@ -138,9 +141,14 @@
 
     <footer class="footer">
         <div class="container">
-            <div class="row g-4">
+            <div class="row g-4 mb-4">
                 <div class="col-lg-4">
-                    <div class="footer-brand">Sha<span>nas</span></div>
+                    <div class="footer-brand">
+                        <div class="d-flex align-items-center gap-2">
+                            <img src="images/logo2.png" alt="Shanas Signature Logo" class="brand-logo">
+                            <h1 class="brand-name mb-0 text-white">Shana's Signature</h1>
+                        </div>
+                    </div>
                     <p class="footer-tagline">
                         Curating moments of joy since 2018. Every gift we send carries warmth, thoughtfulness, and a touch of luxury.
                     </p>
@@ -148,7 +156,7 @@
                         <a href="#" class="social-icon" title="Instagram"><i class="bi bi-instagram"></i></a>
                         <a href="#" class="social-icon" title="Facebook"><i class="bi bi-facebook"></i></a>
                         <a href="#" class="social-icon" title="Pinterest"><i class="bi bi-pinterest"></i></a>
-                        <a href="https://wa.me/918001234567" class="social-icon" title="WhatsApp"><i class="bi bi-whatsapp"></i></a>
+                        <a href="https://wa.me/919086912720" class="social-icon" title="WhatsApp"><i class="bi bi-whatsapp"></i></a>
                         <a href="#" class="social-icon" title="YouTube"><i class="bi bi-youtube"></i></a>
                     </div>
                 </div>
@@ -179,16 +187,16 @@
                 <div class="col-lg-4">
                     <h5>Get in Touch</h5>
                     <p class="mb-2" style="font-size:.85rem;">
-                        <i class="bi bi-telephone me-2" style="color:var(--secondary)"></i>
-                        <a href="tel:+918001234567" style="color:#ccc">+91 800 123 4567</a>
+                        <i class="bi bi-telephone me-2" style="color:var(--vg-golden-yellow)"></i>
+                        <a href="tel:+919086912720" style="color:#ccc">+91 908 691 2720</a>
                     </p>
                     <p class="mb-2" style="font-size:.85rem;">
-                        <i class="bi bi-envelope me-2" style="color:var(--secondary)"></i>
-                        <a href="mailto:hello@Shanas.in" style="color:#ccc">hello@Shanas.in</a>
+                        <i class="bi bi-envelope me-2" style="color:var(--vg-golden-yellow)"></i>
+                        <a href="mailto:shanas.signature130@gmail.com" style="color:#ccc">shanas.signature130@gmail.com</a>
                     </p>
                     <p class="mb-2" style="font-size:.85rem;">
-                        <i class="bi bi-whatsapp me-2" style="color:var(--secondary)"></i>
-                        <a href="https://wa.me/918001234567" style="color:#ccc">WhatsApp Support</a>
+                        <i class="bi bi-whatsapp me-2" style="color:var(--vg-golden-yellow)"></i>
+                        <a href="https://wa.me/919086912720" style="color:#ccc">WhatsApp Support</a>
                     </p>
                     <p style="font-size:.78rem;color:rgba(255,255,255,0.35);margin-top:.75rem;">
                         Mon–Sat: 9AM–9PM &nbsp;|&nbsp; Sun: 10AM–6PM
@@ -197,7 +205,7 @@
             </div>
 
             <div class="footer-bottom">
-                <span>© {{ date('Y') }} Shanas. All rights reserved.</span>
+                <span>© {{ date('Y') }} Shanas Signature. All rights reserved.</span>
                 <div class="pay-badges">
                     <span class="pay-badge">UPI</span>
                     <span class="pay-badge">VISA</span>
@@ -217,8 +225,8 @@
     <div class="offcanvas offcanvas-end offcanvas-cart" tabindex="-1" id="cartOffcanvas">
         <div class="offcanvas-header border-bottom">
             <h5 class="offcanvas-title fw-700">
-                <i class="bi bi-bag me-2" style="color:var(--primary)"></i> Your Cart
-                <span class="badge rounded-pill ms-1" style="background:var(--primary);font-size:.7rem"
+                <i class="bi bi-bag me-2"></i> Your Cart
+                <span class="badge rounded-pill ms-1" style="background:var(--vg-golden-yellow);font-size:.7rem;color:var(--vg-charcoal)"
                     id="cartBadge">{{ session('cart') ? count(session('cart')) : 0 }}</span>
             </h5>
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
@@ -230,7 +238,7 @@
         <div class="p-3 border-top">
             <div class="d-flex justify-content-between mb-3">
                 <span class="fw-500">Subtotal</span>
-                <span class="fw-700" style="color:var(--primary);font-size:1.1rem" id="cartTotal">
+                <span class="fw-700" style="color:var(--vg-sky-blue);font-size:1.1rem" id="cartTotal">
                     ₹{{ session('cartTotal', 0) }}
                 </span>
             </div>
@@ -240,7 +248,7 @@
             <button class="btn btn-outline-secondary w-100 mt-2" data-bs-dismiss="offcanvas">
                 Continue Shopping
             </button>
-            <p class="text-center mt-2" style="font-size:.75rem;color:var(--gray)">
+            <p class="text-center mt-2" style="font-size:.75rem;color:#666">
                 Free shipping on orders above ₹1,500
             </p>
         </div>
@@ -252,7 +260,7 @@
             <div class="modal-content border-0 shadow-lg rounded-4 p-2">
                 <div class="modal-body p-4">
                     <div class="d-flex align-items-center gap-3 mb-4">
-                        <i class="bi bi-search fs-4" style="color:var(--primary)"></i>
+                        <i class="bi bi-search fs-4" style="color:var(--vg-sky-blue)"></i>
                         <input type="text" class="form-control border-0 fs-5 shadow-none"
                             placeholder="Search for gifts, candles, jewellery..."
                             id="globalSearchInput" autofocus>
@@ -266,7 +274,7 @@
                             @foreach(['Gift Hampers','Luxury Candles','Crystal Items','Wedding Gifts','Personalised Gifts','Home Decor','Chocolate Box'] as $s)
                             <a href="{{ route('products.index', ['q'=>$s]) }}"
                                 class="badge rounded-pill border py-2 px-3 text-dark text-decoration-none"
-                                style="background:var(--pink-soft);border-color:var(--pink-border)!important;font-weight:500">
+                                style="background:rgba(107, 163, 216, 0.1);border-color:var(--vg-sky-blue)!important;font-weight:500;color:var(--vg-sky-blue)">
                                 {{ $s }}
                             </a>
                             @endforeach
