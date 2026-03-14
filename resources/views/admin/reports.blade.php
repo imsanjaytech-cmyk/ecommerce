@@ -1,6 +1,6 @@
 @extends('layouts.adminlayout')
 @section('page-title', 'Reports')
-@section('breadcrumb', 'Home / Reports')
+@section('breadcrumb', 'Reports')
 
 @push('page-data')
 <script>
