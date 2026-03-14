@@ -12,8 +12,8 @@
 
     /* ── THEME TOKENS ─────────────────────────────────────── */
     const C = {
-        primary:   '#ff4d6d',
-        secondary: '#ff8fab',
+        primary:   '#2558a0',   /* was #ff4d6d pink  → brand primary blue */
+        secondary: '#3d7fc4',   /* was #ff8fab pink  → brand secondary blue */
         green:     '#1f9c4a',
         blue:      '#1a7cd4',
         orange:    '#d97706',
@@ -49,8 +49,8 @@
     if (el('revenueChart') && window.adminData?.revenue) {
         const ctx = el('revenueChart').getContext('2d');
         const grad = linearGradient(ctx, 240,
-            'rgba(255,77,109,0.18)',
-            'rgba(255,77,109,0.0)'
+            'rgba(37,88,160,0.18)',     /* was rgba(255,77,109,0.18) */
+            'rgba(37,88,160,0.0)'
         );
         new Chart(ctx, {
             type: 'line',
@@ -81,7 +81,7 @@
                         grid: gridLine,
                         ticks: {
                             font: { size: 11 },
-                            callback: v => '$' + (v / 1000) + 'K'
+                            callback: v => '₹' + (v / 1000) + 'K'
                         }
                     }
                 }
@@ -99,7 +99,13 @@
                 labels: window.adminData.category.labels,
                 datasets: [{
                     data: window.adminData.category.data,
-                    backgroundColor: [C.primary, C.blue, C.green, C.orange],
+                    backgroundColor: [
+                        C.primary,    /* #2558a0 — brand blue */
+                        C.secondary,  /* #3d7fc4 — brand secondary */
+                        C.blue,
+                        C.green,
+                        C.orange,
+                    ],
                     borderWidth: 0,
                     hoverOffset: 8,
                 }]
@@ -133,8 +139,8 @@
                     data:  window.adminData.weekly.data,
                     backgroundColor: ctx => {
                         const g = ctx.chart.ctx.createLinearGradient(0, 0, 0, 200);
-                        g.addColorStop(0, 'rgba(255,77,109,0.85)');
-                        g.addColorStop(1, 'rgba(255,143,171,0.35)');
+                        g.addColorStop(0, 'rgba(37,88,160,0.90)');    /* was pink */
+                        g.addColorStop(1, 'rgba(61,127,196,0.35)');   /* was pink secondary */
                         return g;
                     },
                     borderRadius: 7,
@@ -203,7 +209,7 @@
                         label: 'Current',
                         data:  window.adminData.radar.current,
                         borderColor: C.primary,
-                        backgroundColor: 'rgba(255,77,109,0.12)',
+                        backgroundColor: 'rgba(37,88,160,0.12)',     /* was pink */
                         borderWidth: 2,
                         pointBackgroundColor: C.primary,
                         pointRadius: 3,
@@ -249,8 +255,8 @@
                         data:  d.revenue,
                         backgroundColor: ctx => {
                             const g = ctx.chart.ctx.createLinearGradient(0, 0, 0, 220);
-                            g.addColorStop(0, 'rgba(255,77,109,0.85)');
-                            g.addColorStop(1, 'rgba(255,143,171,0.3)');
+                            g.addColorStop(0, 'rgba(37,88,160,0.90)');    /* was pink */
+                            g.addColorStop(1, 'rgba(61,127,196,0.30)');   /* was pink secondary */
                             return g;
                         },
                         borderRadius: 6,
@@ -279,7 +285,7 @@
                     x: { grid: { display: false } },
                     y: {
                         grid: gridLine,
-                        ticks: { callback: v => '$' + (v / 1000) + 'K' }
+                        ticks: { callback: v => '₹' + (v / 1000) + 'K' }
                     }
                 }
             }
@@ -296,7 +302,13 @@
                 labels: window.adminData.source.labels,
                 datasets: [{
                     data: window.adminData.source.data,
-                    backgroundColor: [C.primary, C.blue, C.green, C.orange, C.teal],
+                    backgroundColor: [
+                        C.primary,    /* brand blue */
+                        C.secondary,  /* brand secondary */
+                        C.blue,
+                        C.green,
+                        C.teal,
+                    ],
                     borderWidth: 2,
                     borderColor: '#fff',
                     hoverOffset: 10,
