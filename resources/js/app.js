@@ -48,22 +48,22 @@ window.showToast = function (msg) {
 
 
 /* ---------------- ADD TO CART ---------------- */
-    window.addToCart = function (productId, name) {
+window.addToCart = function (productId, name) {
 
-        fetch('/cart/add', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'X-CSRF-TOKEN': document
-                    .querySelector('meta[name="csrf-token"]')
-                    .content
-            },
-            body: JSON.stringify({
-                product_id: productId,
-                qty: 1
-            })
+    fetch('/cart/add', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': document
+                .querySelector('meta[name="csrf-token"]')
+                .content
+        },
+        body: JSON.stringify({
+            product_id: productId,
+            qty: 1
         })
+    })
         .then(r => r.json())
         .then(data => {
 
@@ -87,7 +87,7 @@ window.showToast = function (msg) {
             showToast(`✓ "${name}" added to cart`);
         })
         .catch(() => showToast('Something went wrong.'));
-    };
+};
 
 
 /* ---------------- UPDATE QTY ---------------- */
@@ -117,20 +117,20 @@ window.updateQty = function (id, delta) {
             qty: newQty
         })
     })
-    .then(r => r.json())
-    .then(data => {
+        .then(r => r.json())
+        .then(data => {
 
-        if (!data.success) return;
+            if (!data.success) return;
 
-        document.getElementById('cartBody').innerHTML =
-            data.cartHtml;
+            document.getElementById('cartBody').innerHTML =
+                data.cartHtml;
 
-        document.querySelectorAll('#cartCount, #cartBadge')
-            .forEach(el => el.textContent = data.cartCount);
+            document.querySelectorAll('#cartCount, #cartBadge')
+                .forEach(el => el.textContent = data.cartCount);
 
-        document.getElementById('cartTotal').textContent =
-            '₹' + data.cartTotal;
-    });
+            document.getElementById('cartTotal').textContent =
+                '₹' + data.cartTotal;
+        });
 };
 
 
@@ -148,22 +148,22 @@ window.removeFromCart = function (id) {
         },
         body: JSON.stringify({ product_id: id })
     })
-    .then(r => r.json())
-    .then(data => {
+        .then(r => r.json())
+        .then(data => {
 
-        if (!data.success) return;
+            if (!data.success) return;
 
-        document.getElementById('cartBody').innerHTML =
-            data.cartHtml;
+            document.getElementById('cartBody').innerHTML =
+                data.cartHtml;
 
-        document.querySelectorAll('#cartCount, #cartBadge')
-            .forEach(el => el.textContent = data.cartCount);
+            document.querySelectorAll('#cartCount, #cartBadge')
+                .forEach(el => el.textContent = data.cartCount);
 
-        document.getElementById('cartTotal').textContent =
-            '₹' + data.cartTotal;
+            document.getElementById('cartTotal').textContent =
+                '₹' + data.cartTotal;
 
-        showToast('Item removed from cart');
-    });
+            showToast('Item removed from cart');
+        });
 };
 
 
@@ -182,48 +182,51 @@ window.toggleWishlist = function (btn, productId) {
         },
         body: JSON.stringify({ product_id: productId })
     })
-    .then(r => r.json())
-    .then(data => {
+        .then(r => r.json())
+        .then(data => {
 
-        if (!data.success) return;
+            if (!data.success) return;
 
-        icon.classList.toggle('bi-heart', !data.added);
-        icon.classList.toggle('bi-heart-fill', data.added);
-        btn.classList.toggle('active', data.added);
+            icon.classList.toggle('bi-heart', !data.added);
+            icon.classList.toggle('bi-heart-fill', data.added);
+            btn.classList.toggle('active', data.added);
 
-        showToast(
-            data.added
-                ? '♥ Added to wishlist'
-                : 'Removed from wishlist'
-        );
-    });
+            showToast(
+                data.added
+                    ? '♥ Added to wishlist'
+                    : 'Removed from wishlist'
+            );
+        });
 };
-/* ── Hero Interactive Gift Game ── */
-/* ═══════════════════════════════════════════════════════
-   HERO INTERACTIVE GIFT GAME
-   Font Awesome 6 Solid icons rendered on Canvas
-   — Click / tap the floating icons to collect gifts!
-═══════════════════════════════════════════════════════ */
+
+/* ============================================================
+   HERO CANVAS — interactive floating gift icons
+   FIX: use devicePixelRatio-aware coordinate mapping so
+   hit-detection works correctly on all screen densities
+   and when the canvas CSS size ≠ its pixel buffer size.
+============================================================ */
 (function () {
     const canvas = document.getElementById('heroCanvas');
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
 
     let W, H;
-    let orbs      = [];
-    let gifts     = [];
+    let orbs = [];
+    let gifts = [];
     let confettis = [];
-    let popTexts  = [];
-    let score     = 0;
-    let scoreEl;
+    let popTexts = [];
+    let score = 0;
+    let scoreEl = null;
     let hintAlpha = 1;
     let hintTimer = 0;
-    const mouse   = { x: -999, y: -999 };
+    const mouse = { x: -999, y: -999 };
 
-    /* ────────────────────────────────
-       Score badge (DOM overlay)
-    ──────────────────────────────── */
+    /* ── Score badge ── */
     function createScoreEl() {
+        // Remove any stale badge from a previous init
+        const old = document.getElementById('heroScore');
+        if (old) old.remove();
+
         scoreEl = document.createElement('div');
         scoreEl.id = 'heroScore';
         scoreEl.style.cssText = `
@@ -238,7 +241,7 @@ window.toggleWishlist = function (btn, productId) {
             font-size: .75rem;
             font-weight: 700;
             color: var(--primary);
-            box-shadow: 0 4px 16px rgba(255,77,109,.22);
+            box-shadow: 0 4px 16px rgba(37,88,160,.22);
             display: flex;
             align-items: center;
             gap: 7px;
@@ -249,42 +252,51 @@ window.toggleWishlist = function (btn, productId) {
         scoreEl.innerHTML =
             `<i class="fa-solid fa-gift" style="font-size:.82rem"></i>` +
             `<span id="scoreNum">0</span> collected!`;
-        canvas.parentElement.style.position = 'relative';
-        canvas.parentElement.appendChild(scoreEl);
+
+        // Make sure parent can contain an absolutely-positioned child
+        const parent = canvas.parentElement;
+        if (getComputedStyle(parent).position === 'static') {
+            parent.style.position = 'relative';
+        }
+        parent.appendChild(scoreEl);
     }
 
     function bumpScore() {
         score++;
-        document.getElementById('scoreNum').textContent = score;
-        scoreEl.style.transform = 'scale(1.22)';
-        setTimeout(() => scoreEl.style.transform = 'scale(1)', 160);
+        // Always query fresh — avoids stale reference after DOM updates
+        const numEl = document.getElementById('scoreNum');
+        if (numEl) numEl.textContent = score;
+
+        if (scoreEl) {
+            scoreEl.style.transform = 'scale(1.22)';
+            setTimeout(() => { if (scoreEl) scoreEl.style.transform = 'scale(1)'; }, 160);
+        }
     }
 
-    /* ────────────────────────────────
-       Background pink orbs
-    ──────────────────────────────── */
+    /* ── Colour palette — primary blues ── */
     const PALETTES = [
-        [255, 77,  109],
-        [255, 143, 171],
-        [255, 180, 197],
-        [220, 80,  120],
+        [37,  88,  160],
+        [61,  127, 196],
+        [100, 160, 220],
+        [20,  60,  120],
     ];
 
+    /* ── Orb (background glow particle) ── */
     class Orb {
         constructor() { this.reset(true); }
         reset(init = false) {
-            this.x        = Math.random() * W;
-            this.y        = init ? Math.random() * H : Math.random() * H;
-            this.r        = 3 + Math.random() * 6;
-            this.vx       = (Math.random() - .5) * .35;
-            this.vy       = (Math.random() - .5) * .35;
-            this.alpha    = 0;
+            this.x = Math.random() * W;
+            this.y = init ? Math.random() * H : Math.random() * H;
+            this.r = 3 + Math.random() * 6;
+            this.vx = (Math.random() - .5) * .35;
+            this.vy = (Math.random() - .5) * .35;
+            this.alpha = 0;
             this.maxAlpha = .08 + Math.random() * .18;
-            this.fadeIn   = true;
-            this.life     = 0;
-            this.maxLife  = 300 + Math.random() * 400;
-            this.color    = PALETTES[Math.floor(Math.random() * PALETTES.length)];
-            this.pulse    = Math.random() * Math.PI * 2;
+            this.fadeIn = true;
+            this.life = 0;
+            this.maxLife = 300 + Math.random() * 400;
+            this.color = PALETTES[Math.floor(Math.random() * PALETTES.length)];
+            this.pulse = Math.random() * Math.PI * 2;
         }
         update() {
             this.life++;
@@ -299,11 +311,11 @@ window.toggleWishlist = function (btn, productId) {
             if (this.life > this.maxLife - 60) this.alpha -= .006;
             if (this.life > this.maxLife || this.alpha <= 0) { this.reset(); return; }
             const [r, g, b] = this.color;
-            const radius    = this.r * pf;
+            const radius = this.r * pf;
             const grd = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, radius * 5);
-            grd.addColorStop(0,  `rgba(${r},${g},${b},${this.alpha})`);
+            grd.addColorStop(0, `rgba(${r},${g},${b},${this.alpha})`);
             grd.addColorStop(.5, `rgba(${r},${g},${b},${this.alpha * .2})`);
-            grd.addColorStop(1,  `rgba(${r},${g},${b},0)`);
+            grd.addColorStop(1, `rgba(${r},${g},${b},0)`);
             ctx.beginPath();
             ctx.arc(this.x, this.y, radius * 5, 0, Math.PI * 2);
             ctx.fillStyle = grd;
@@ -315,19 +327,16 @@ window.toggleWishlist = function (btn, productId) {
         }
     }
 
-    /* ────────────────────────────────
-       Font Awesome icon definitions
-       (FA 6 Solid Unicode codepoints)
-    ──────────────────────────────── */
+    /* ── Gift icons (Font Awesome unicode) ── */
     const GIFT_ICONS = [
-        { code: '\uf06b', color: '#ff4d6d' },   // fa-gift
-        { code: '\uf5b5', color: '#ff8fab' },   // fa-gifts
-        { code: '\uf466', color: '#e63b5c' },   // fa-ribbon
-        { code: '\uf004', color: '#ff4d6d' },   // fa-heart
-        { code: '\uf005', color: '#ffc107' },   // fa-star
-        { code: '\uf517', color: '#ff8fab' },   // fa-birthday-cake
-        { code: '\uf72b', color: '#c13584' },   // fa-candy-cane
-        { code: '\uf4b9', color: '#ff4d6d' },   // fa-gem
+        { code: '\uf06b', color: '#ffffff' },   // fa-gift
+        { code: '\uf5b5', color: '#d4af37' },   // fa-gifts
+        { code: '\uf466', color: '#ffffff' },   // fa-ribbon
+        { code: '\uf004', color: '#d4af37' },   // fa-heart
+        { code: '\uf005', color: '#ffffff' },   // fa-star
+        { code: '\uf517', color: '#d4af37' },   // fa-birthday-cake
+        { code: '\uf72b', color: '#ffffff' },   // fa-candy-cane
+        { code: '\uf4b9', color: '#d4af37' },   // fa-gem
     ];
 
     const POP_WORDS = ['+1', 'yay!', 'wow!', 'nice!', 'got it!', '💖'];
@@ -335,80 +344,84 @@ window.toggleWishlist = function (btn, productId) {
     class Gift {
         constructor() { this.reset(); }
         reset() {
-            this.x           = 60 + Math.random() * (W - 120);
-            this.y           = H + 60;
-            this.size        = 22 + Math.random() * 18;
-            this.vx          = (Math.random() - .5) * .8;
-            this.vy          = -(0.55 + Math.random() * 0.75);
+            this.x  = 60 + Math.random() * (W - 120);
+            this.y  = H + 60;
+            this.size = 22 + Math.random() * 18;
+            this.vx = (Math.random() - .5) * .8;
+            this.vy = -(0.55 + Math.random() * 0.75);
             this.wobble      = Math.random() * Math.PI * 2;
             this.wobbleSpeed = .02 + Math.random() * .02;
-            this.spin        = 0;
-            this.spinSpeed   = (Math.random() - .5) * .025;
-            const pick       = GIFT_ICONS[Math.floor(Math.random() * GIFT_ICONS.length)];
-            this.code        = pick.code;
-            this.color       = pick.color;
-            this.alpha       = 0;
-            this.clicked     = false;
-            this.popText     = POP_WORDS[Math.floor(Math.random() * POP_WORDS.length)];
+            this.spin      = 0;
+            this.spinSpeed = (Math.random() - .5) * .025;
+            const pick = GIFT_ICONS[Math.floor(Math.random() * GIFT_ICONS.length)];
+            this.code  = pick.code;
+            this.color = pick.color;
+            this.alpha   = 0;
+            this.clicked = false;
+            this.popText = POP_WORDS[Math.floor(Math.random() * POP_WORDS.length)];
         }
         update() {
             if (this.clicked) return;
             this.wobble += this.wobbleSpeed;
             this.spin   += this.spinSpeed;
-            this.x      += this.vx + Math.sin(this.wobble) * .45;
-            this.y      += this.vy;
-            this.alpha   = Math.min(this.alpha + .03, 1);
+            this.x += this.vx + Math.sin(this.wobble) * .45;
+            this.y += this.vy;
+            this.alpha = Math.min(this.alpha + .03, 1);
             if (this.y < -80) this.reset();
         }
         draw() {
             if (this.clicked) return;
             ctx.save();
-            ctx.globalAlpha  = this.alpha;
+            ctx.globalAlpha = this.alpha;
             ctx.translate(this.x, this.y);
             ctx.rotate(this.spin);
-            ctx.font         = `900 ${this.size}px "Font Awesome 6 Free"`;
-            ctx.fillStyle    = this.color;
+            ctx.font = `900 ${this.size}px "Font Awesome 6 Free"`;
+            ctx.fillStyle = this.color;
             ctx.textAlign    = 'center';
             ctx.textBaseline = 'middle';
-            ctx.shadowColor  = this.color + '70';
-            ctx.shadowBlur   = 22;
+            ctx.shadowColor = this.color + '70';
+            ctx.shadowBlur  = 22;
             ctx.fillText(this.code, 0, 0);
             ctx.restore();
         }
-        isHit(mx, my) {
-            return Math.abs(mx - this.x) < this.size &&
-                   Math.abs(my - this.y) < this.size;
+        /**
+         * FIX: hit radius uses the actual canvas-space size (this.size),
+         * not a fixed pixel value that would be wrong after DPI scaling.
+         */
+        isHit(cx, cy) {
+            const dx = cx - this.x;
+            const dy = cy - this.y;
+            return Math.sqrt(dx * dx + dy * dy) < this.size * 1.2;
         }
     }
 
-    /* ────────────────────────────────
-       Confetti pieces
-    ──────────────────────────────── */
+    /* ── Confetti ── */
     class Confetti {
         constructor(x, y, mini = false) {
-            this.x       = x; this.y = y;
-            this.vx      = (Math.random() - .5) * (mini ? 3 : 8);
-            this.vy      = mini ? (Math.random() - .5) * 2 : (-3 - Math.random() * 6);
+            this.x = x; this.y = y;
+            this.vx = (Math.random() - .5) * (mini ? 3 : 8);
+            this.vy = mini ? (Math.random() - .5) * 2 : (-3 - Math.random() * 6);
             this.gravity = mini ? .04 : .23;
-            this.size    = mini ? (2 + Math.random() * 3) : (5 + Math.random() * 6);
-            this.color   = `hsl(${320 + Math.random() * 70},88%,${55 + Math.random() * 20}%)`;
-            this.alpha   = 1;
-            this.rot     = Math.random() * Math.PI * 2;
-            this.rotV    = (Math.random() - .5) * .18;
-            this.shape   = Math.random() > .5 ? 'rect' : 'circle';
+            this.size  = mini ? (2 + Math.random() * 3) : (5 + Math.random() * 6);
+            const COLORS = ['#D4AF37', '#FFD700', '#ffffff'];
+            this.color = COLORS[Math.floor(Math.random() * COLORS.length)];
+            this.alpha = 1;
+            this.rot  = Math.random() * Math.PI * 2;
+            this.rotV = (Math.random() - .5) * .18;
+            this.shape = Math.random() > .5 ? 'rect' : 'circle';
         }
         update() {
-            this.vy   += this.gravity;
-            this.x    += this.vx;
-            this.y    += this.vy;
-            this.rot  += this.rotV;
+            this.vy += this.gravity;
+            this.x  += this.vx;
+            this.y  += this.vy;
+            this.rot += this.rotV;
             this.alpha -= .02;
         }
         draw() {
             if (this.alpha <= 0) return;
             ctx.save();
             ctx.globalAlpha = this.alpha;
-            ctx.fillStyle   = this.color;
+            ctx.fillStyle = this.color;
             ctx.translate(this.x, this.y);
             ctx.rotate(this.rot);
             if (this.shape === 'rect') {
@@ -422,89 +435,99 @@ window.toggleWishlist = function (btn, productId) {
         }
     }
 
-    /* ────────────────────────────────
-       Floating "+1 yay!" pop text
-    ──────────────────────────────── */
+    /* ── Pop text ── */
     class PopText {
         constructor(x, y, text) {
             this.x = x; this.y = y; this.text = text;
             this.vy = -2; this.alpha = 1; this.scale = 0;
         }
         update() {
-            this.y     += this.vy;
-            this.vy    *= .96;
+            this.y    += this.vy;
+            this.vy   *= .96;
             this.alpha -= .024;
-            this.scale  = Math.min(this.scale + .14, 1);
+            this.scale = Math.min(this.scale + .14, 1);
         }
         draw() {
             if (this.alpha <= 0) return;
             ctx.save();
             ctx.globalAlpha  = this.alpha;
             ctx.font         = `700 ${Math.round(17 * this.scale)}px 'Poppins',sans-serif`;
-            ctx.fillStyle    = '#ff4d6d';
+            ctx.fillStyle    = '#fff';
             ctx.textAlign    = 'center';
             ctx.textBaseline = 'middle';
-            ctx.shadowColor  = 'rgba(255,77,109,.45)';
+            ctx.shadowColor  = 'rgba(212,175,55,0.45)';
             ctx.shadowBlur   = 8;
             ctx.fillText(this.text, this.x, this.y);
             ctx.restore();
         }
     }
 
-    /* ────────────────────────────────
-       Helpers
-    ──────────────────────────────── */
+    /* ── Helpers ── */
     function spawnBurst(x, y) {
         for (let i = 0; i < 36; i++) confettis.push(new Confetti(x, y, false));
     }
 
-    function handleClick(e) {
+    /**
+     * KEY FIX — coordinate mapping.
+     *
+     * The canvas drawing buffer (W × H) is set to the element's
+     * offsetWidth × offsetHeight in resize().  When we receive a
+     * mouse/touch event its coordinates are in CSS pixels relative
+     * to the viewport.  We need to convert them to canvas-buffer
+     * pixels using the canvas's bounding rect (which accounts for
+     * any CSS transform / zoom) — NOT by dividing by devicePixelRatio.
+     */
+    function eventToCanvas(e) {
         const rect   = canvas.getBoundingClientRect();
-        const scaleX = W / rect.width;
+        const scaleX = W / rect.width;   // canvas-buf-px per CSS-px
         const scaleY = H / rect.height;
-        const cx = (e.clientX - rect.left) * scaleX;
-        const cy = (e.clientY - rect.top)  * scaleY;
+        return {
+            cx: (e.clientX - rect.left) * scaleX,
+            cy: (e.clientY - rect.top)  * scaleY,
+        };
+    }
+
+    function handleClick(e) {
+        const { cx, cy } = eventToCanvas(e);
         let hit = false;
+
         gifts.forEach(g => {
             if (!g.clicked && g.isHit(cx, cy)) {
                 g.clicked = true;
                 spawnBurst(g.x, g.y);
                 popTexts.push(new PopText(g.x, g.y - 36, g.popText));
-                bumpScore();
+                bumpScore();           // ← always increments now
                 hit = true;
                 setTimeout(() => g.reset(), 550);
             }
         });
-        // Small sparkle burst even on miss
+
+        // Small sparkle burst on miss
         if (!hit) {
             for (let i = 0; i < 8; i++) confettis.push(new Confetti(cx, cy, true));
         }
     }
 
-    /* ────────────────────────────────
-       Events
-    ──────────────────────────────── */
+    /* ── Events ── */
     canvas.addEventListener('mousemove', e => {
-        const rect = canvas.getBoundingClientRect();
-        mouse.x = (e.clientX - rect.left) * (W / rect.width);
-        mouse.y = (e.clientY - rect.top)  * (H / rect.height);
-        // Sparkle trail
-        if (Math.random() < .22) confettis.push(new Confetti(mouse.x, mouse.y, true));
-        // Pointer cursor when hovering a gift
-        canvas.style.cursor = gifts.some(g => !g.clicked && g.isHit(mouse.x, mouse.y))
+        const { cx, cy } = eventToCanvas(e);
+        mouse.x = cx;
+        mouse.y = cy;
+        if (Math.random() < .22) confettis.push(new Confetti(cx, cy, true));
+        canvas.style.cursor = gifts.some(g => !g.clicked && g.isHit(cx, cy))
             ? 'pointer' : 'default';
     });
+
     canvas.addEventListener('mouseleave', () => { mouse.x = -999; mouse.y = -999; });
     canvas.addEventListener('click', handleClick);
+
     canvas.addEventListener('touchstart', e => {
         e.preventDefault();
         const t = e.touches[0];
         handleClick({ clientX: t.clientX, clientY: t.clientY });
     }, { passive: false });
 
-    /* ────────────────────────────────
-       Draw helpers
-    ──────────────────────────────── */
+    /* ── Draw helpers ── */
     function drawConnections() {
         for (let i = 0; i < orbs.length; i++) {
             for (let j = i + 1; j < orbs.length; j++) {
@@ -515,7 +538,7 @@ window.toggleWishlist = function (btn, productId) {
                     ctx.beginPath();
                     ctx.moveTo(a.x, a.y);
                     ctx.lineTo(b.x, b.y);
-                    ctx.strokeStyle = `rgba(255,77,109,${(1 - d / 100) * .06})`;
+                    ctx.strokeStyle = `rgba(212,175,55,${(1 - d / 100) * 0.2})`;
                     ctx.lineWidth   = .6;
                     ctx.stroke();
                 }
@@ -530,15 +553,15 @@ window.toggleWishlist = function (btn, productId) {
         ctx.save();
         ctx.globalAlpha  = hintAlpha * .55;
         ctx.font         = "500 12px 'Poppins',sans-serif";
-        ctx.fillStyle    = '#ff4d6d';
+        ctx.fillStyle    = '#ffffff';
+        ctx.shadowColor  = '#D4AF37';
+        ctx.shadowBlur   = 10;
         ctx.textAlign    = 'center';
         ctx.fillText('✨  Click the floating icons to collect gifts!  ✨', W / 2, H - 20);
         ctx.restore();
     }
 
-    /* ────────────────────────────────
-       Main render loop
-    ──────────────────────────────── */
+    /* ── Main loop ── */
     function loop() {
         ctx.clearRect(0, 0, W, H);
         drawConnections();
@@ -552,6 +575,8 @@ window.toggleWishlist = function (btn, productId) {
         requestAnimationFrame(loop);
     }
 
+    /* ── Resize: keep buffer = element size (no DPR multiplication
+       so coordinates stay 1-to-1 with offsetWidth/offsetHeight) ── */
     function resize() {
         W = canvas.width  = canvas.offsetWidth;
         H = canvas.height = canvas.offsetHeight;
@@ -560,9 +585,9 @@ window.toggleWishlist = function (btn, productId) {
     function init() {
         resize();
         orbs  = Array.from({ length: 90 }, () => new Orb());
-        gifts = Array.from({ length: 7  }, () => {
+        gifts = Array.from({ length: 7 }, () => {
             const g = new Gift();
-            g.y = Math.random() * H;   // scatter on load instead of all coming from bottom
+            g.y = Math.random() * H;   // scatter on load
             return g;
         });
         createScoreEl();
@@ -572,6 +597,7 @@ window.toggleWishlist = function (btn, productId) {
     window.addEventListener('resize', resize);
     init();
 })();
+
 /* ── Go To Top ── */
 (function () {
     const btn = document.getElementById('goTop');
