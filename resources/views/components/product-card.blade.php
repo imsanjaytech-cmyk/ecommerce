@@ -24,7 +24,7 @@
                 ? round((($oldPrice - $price) / $oldPrice) * 100)
                 : 0;
 
-    $placeholder = 'https://placehold.co/600x600/fff0f3/ff4d6d?text=No+Image';
+    $placeholder = 'https://placehold.co/600x600/2558a0/fff?text=No+Image';
 
     if ($isModel) {
         $imgUrl = $product->thumbnail_url;
