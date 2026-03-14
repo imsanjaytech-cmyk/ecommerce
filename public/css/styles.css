@@ -1258,18 +1258,21 @@ img { max-width: 100%; display: block; }
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: #1a3456;
+    background-color: #3a5983;
 }
 
 .hero-section::after {
     content: '';
     position: absolute;
-    inset: 0;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg/1280px-Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg');
     background-size: cover;
-    background-position: center top;
+    background-position: center;
     background-repeat: no-repeat;
-    opacity: 0.75;
+    opacity: 0.15;
     mix-blend-mode: overlay;
     z-index: 0;
     pointer-events: none;
@@ -1278,16 +1281,15 @@ img { max-width: 100%; display: block; }
 .hero-section::before {
     content: '';
     position: absolute;
-    inset: 0;
-    background: linear-gradient(
-        135deg,
-        rgba(26, 52, 86, 0.55) 0%,
-        rgba(37, 88, 160, 0.40) 50%,
-        rgba(61, 127, 196, 0.30) 100%
-    );
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23f4a442" fill-opacity="0.15" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,154.7C960,171,1056,181,1152,165.3C1248,149,1344,107,1392,85.3L1440,64L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>');
+    background-size: cover;
+    animation: wave 15s ease-in-out infinite;
+    opacity: 0.4;
     z-index: 1;
-    pointer-events: none;
-    animation: none;
 }
 
 .hero-section > * { position: relative; z-index: 2; }
