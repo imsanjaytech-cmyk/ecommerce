@@ -55,7 +55,16 @@
             min-height: 100vh;
             font-size: 14px;
         }
-
+        .brand-name{
+            font-family: 'Aladin', cursive;
+            font-size: 1.70rem;
+            color: #000;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            letter-spacing: 1px;
+            line-height: 1;
+            margin: 0;
+            white-space: nowrap;
+        }
         ::-webkit-scrollbar {
             width: 5px;
             height: 5px;
