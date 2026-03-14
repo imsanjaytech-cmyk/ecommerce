@@ -229,6 +229,6 @@ class Product extends Model
 
     private function placeholder(): string
     {
-        return 'https://placehold.co/600x600/fff0f3/ff4d6d?text=No+Image';
+        return 'https://placehold.co/600x600/2558a0/fff?text=No+Image';
     }
 }
