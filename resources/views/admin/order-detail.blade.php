@@ -1,6 +1,6 @@
 @extends('layouts.adminlayout')
 @section('page-title', 'Order #' . $order->order_number)
-@section('breadcrumb', 'Home / Orders / #' . $order->order_number)
+@section('breadcrumb', 'Orders / #' . $order->order_number)
 
 @section('content')
 
