@@ -1,6 +1,6 @@
 @extends('layouts.adminlayout')
 @section('page-title', 'Settings')
-@section('breadcrumb', 'Home / Settings')
+@section('breadcrumb', 'Settings')
 
 @section('content')
 
