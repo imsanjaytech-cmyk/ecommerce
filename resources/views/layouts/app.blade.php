@@ -37,10 +37,14 @@
     <nav class="navbar navbar-expand-lg navbar-light">
         <div class="container">
             <a class="navbar-brand" href="{{ route('home') }}">
-                <div class="d-flex align-items-center gap-2">
-                    <img src="images/logo2.png" alt="Shanas Signature Logo" class="brand-logo">
-                    <h1 class="brand-name mb-0">Shana's Signature</h1>
-                </div>
+            <div class="d-flex align-items-center gap-2">
+                <img src="images/logo2.png" 
+                    alt="Shanas Signature Logo" 
+                    class="brand-logo"
+                    onerror="this.style.display='none'">
+
+                <h1 class="brand-name mb-0">Shana's Signature</h1>
+            </div>
             </a>
 
             <button class="navbar-toggler border-0 shadow-none" type="button"
